@@ -83,11 +83,11 @@
         cursor: pointer;
     }
 
-    /* 시뮬레이터-2 : 크롬 금속 공 (캔버스) */
+    /* 시뮬레이터-2 : 크롬 금속 공 (캔버스) — 위에서 내려다본 시점 */
     #panel2 {
         background:
-            radial-gradient(circle at 50% -10%, rgba(160,190,220,0.25) 0%, rgba(0,0,0,0) 55%),
-            linear-gradient(#2e343c 0%, #1b1f26 60%, #101318 100%);
+            radial-gradient(circle at 50% 28%, rgba(150, 180, 210, 0.16) 0%, rgba(0,0,0,0) 60%),
+            radial-gradient(circle at 50% 50%, #2b3138 0%, #1d2228 55%, #10141a 100%);
     }
     #metal-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 
@@ -425,40 +425,36 @@ function updateSim2(t, dt) {
 
     mCtx.clearRect(0, 0, W, H);
 
-    // 접촉 그림자
+    /* 위에서 내려다본 시점의 그림자 :
+       폰 상단에 고정된 광원의 반대 방향으로, 광원에서 멀수록 조금 더 길게 떨어짐 */
     const lightX = W / 2, lightY = -H * 0.25;
     let dx = lightX - B2.x, dy = lightY - B2.y;
     const d = Math.hypot(dx, dy) || 1;
     dx /= d; dy /= d;
-    const shx = B2.x - dx * 20 - B2.vx * 1.5;
-    const shy = B2.y + R + 10;
-    const sh = mCtx.createRadialGradient(shx, shy, R * 0.1, shx, shy, R * 1.25);
-    sh.addColorStop(0, 'rgba(0,0,0,0.55)');
-    sh.addColorStop(1, 'rgba(0,0,0,0)');
-    mCtx.save();
-    mCtx.translate(shx, shy);
-    mCtx.scale(1 + Math.min(0.7, speed * 0.06), 0.28);
-    mCtx.translate(-shx, -shy);
+
+    const so = R * (0.45 + d / (H * 2.2));          // 그림자 오프셋
+    const shx = B2.x - dx * so - B2.vx * 1.2;        // 움직이면 살짝 끌림
+    const shy = B2.y - dy * so - B2.vy * 1.2;
+    const sh = mCtx.createRadialGradient(shx, shy, R * 0.15, shx, shy, R * 1.3);
+    sh.addColorStop(0,   'rgba(0,0,0,0.5)');
+    sh.addColorStop(0.6, 'rgba(0,0,0,0.22)');
+    sh.addColorStop(1,   'rgba(0,0,0,0)');
     mCtx.beginPath();
-    mCtx.arc(shx, shy, R * 1.25, 0, Math.PI * 2);
+    mCtx.ellipse(shx, shy,
+        R * 1.18 * (1 + Math.min(0.4, speed * 0.035)),   // 속도 방향으로 살짝 늘어남
+        R * 1.06,
+        Math.atan2(-dy, -dx), 0, Math.PI * 2);
     mCtx.fillStyle = sh;
     mCtx.fill();
-    mCtx.restore();
 
-    // 광택 바닥 반사상
-    mCtx.save();
-    mCtx.globalAlpha = 0.13;
-    mCtx.translate(0, (B2.y + R) * 2);
-    mCtx.scale(1, -1);
-    const refl = mCtx.createRadialGradient(B2.x, B2.y, R * 0.1, B2.x, B2.y, R);
-    refl.addColorStop(0, '#dfe8ee');
-    refl.addColorStop(0.6, '#7a858f');
-    refl.addColorStop(1, 'rgba(20,25,30,0)');
+    // 공 바로 밑의 진한 접촉 음영 (탑뷰에서 공 가장자리로 살짝 비어져 나옴)
+    const ao2 = mCtx.createRadialGradient(B2.x, B2.y, R * 0.85, B2.x, B2.y, R * 1.18);
+    ao2.addColorStop(0, 'rgba(0,0,0,0.30)');
+    ao2.addColorStop(1, 'rgba(0,0,0,0)');
     mCtx.beginPath();
-    mCtx.arc(B2.x, B2.y, R, 0, Math.PI * 2);
-    mCtx.fillStyle = refl;
+    mCtx.arc(B2.x, B2.y, R * 1.18, 0, Math.PI * 2);
+    mCtx.fillStyle = ao2;
     mCtx.fill();
-    mCtx.restore();
 
     drawChromeBall(mCtx, B2, R, W, H, t, 'floor');
 }
@@ -502,7 +498,7 @@ const FAB = {
     pull:    0.62,    // 장력 (당김 강도)
     elastic: 0.44,    // 섬유 탄성
     wave:    0.45,    // 드래그 물결
-    shade:   0.55,    // 명암 강도
+    shade:   0.62,    // 명암 강도
     gloss:   0.12,    // 광택 (실크감)
     spacing: 24,      // 직조 밀도 (spacing = 52 - 28)
     recover: 0.011    // 복원 속도 (자국이 약 1.5초에 걸쳐 회복)
@@ -519,7 +515,9 @@ const ballPress = {
     strength: 1, age: 0,
     seed: Math.random() * 999 | 0,
     seed2: Math.random() * 999 | 0,
-    angle: 0
+    angle: 0,
+    pullBoost: 1.25,    // 원래보다 실이 살짝만 더 끌려 들어옴
+    sharp: true         // 당김이 접촉부 근처에 집중
 };
 
 function addTrailImpact(x, y, dx, dy, radius, depth) {
@@ -560,7 +558,11 @@ function fabDisplace(x, y) {
         const dxN = d ? dx / d : 0, dyN = d ? dy / d : 0;
 
         // 안쪽으로 당김 (장력) : 실이 눌린 중심을 향해 딸려 들어감
-        const inward = -im.depth * 0.22 * FAB.pull * fall * s;
+        // 공의 지속 눌림(pullBoost·sharp)은 접촉부에서 훨씬 강하고 가파르게 당겨져
+        // 팽팽한 천이 공 무게에 끌려 들어가는 인상을 만든다
+        const pb = im.pullBoost || 1;
+        const fallP = im.sharp ? Math.pow(fall, 1.6) : fall;
+        const inward = -im.depth * 0.22 * FAB.pull * fallP * s * pb;
         px += dxN * inward;
         py += dyN * inward;
 
@@ -674,13 +676,19 @@ function updateSim3(t, dt) {
         B3.vy += Math.sin(beta  * Math.PI / 180) * gAcc * dt;
         B3.vx *= Math.pow(0.978, dt);
         B3.vy *= Math.pow(0.978, dt);
+        // 팽팽한 천의 눌림 골 저항 : 느려지면 자기 골에 안착하듯 멈춘다
+        const spd3 = Math.hypot(B3.vx, B3.vy);
+        if (spd3 < 1.1) { B3.vx *= Math.pow(0.93, dt); B3.vy *= Math.pow(0.93, dt); }
         B3.x += B3.vx * dt;
         B3.y += B3.vy * dt;
         const topLimit = R0 + 54;
-        if (B3.x < R0)     { B3.x = R0;     B3.vx = -B3.vx * 0.35; }
-        if (B3.x > W - R0) { B3.x = W - R0; B3.vx = -B3.vx * 0.35; }
-        if (B3.y < topLimit) { B3.y = topLimit; B3.vy = -B3.vy * 0.35; }
-        if (B3.y > H - R0) { B3.y = H - R0; B3.vy = -B3.vy * 0.35; }
+        let hitWall = false;
+        if (B3.x < R0)     { B3.x = R0;     B3.vx = -B3.vx * 0.35; hitWall = true; }
+        if (B3.x > W - R0) { B3.x = W - R0; B3.vx = -B3.vx * 0.35; hitWall = true; }
+        if (B3.y < topLimit) { B3.y = topLimit; B3.vy = -B3.vy * 0.35; hitWall = true; }
+        if (B3.y > H - R0) { B3.y = H - R0; B3.vy = -B3.vy * 0.35; hitWall = true; }
+        // 천이 출렁이며 공을 받아내는 반동 (공이 살짝 꿀렁하며 깊게 눌림)
+        if (hitWall) B3.scaleVel += 0.05;
 
         B3.rollAngle += Math.hypot(B3.vx, B3.vy) * dt / R0;
     }
@@ -697,7 +705,7 @@ function updateSim3(t, dt) {
     ballPress.dy = B3.vy * 1.6;
     ballPress.angle = Math.atan2(B3.vy, B3.vx) || ballPress.angle;
     ballPress.radius = R * 2.4;                       // 영향 반경 (첨부 기본 155에 상응)
-    ballPress.depth  = 46 * B3.scale * B3.scale;      // 눌림 깊이 : 누르면 더 깊어짐
+    ballPress.depth  = 50 * B3.scale * B3.scale;      // 눌림 깊이 : 원래보다 살짝만 깊게
     ballPress.strength = 1;                            // 공이 있는 동안은 회복되지 않음
 
     const moved = Math.hypot(B3.x - lastTrailX, B3.y - lastTrailY);
@@ -729,7 +737,7 @@ function updateSim3(t, dt) {
 
     const sox = B3.x - dx * R * 0.55, soy = B3.y - dy * R * 0.55 + R * 0.15;
     const soft = cCtx.createRadialGradient(sox, soy, R * 0.3, sox, soy, R * 1.7);
-    soft.addColorStop(0, 'rgba(90, 84, 74, 0.20)');
+    soft.addColorStop(0, 'rgba(90, 84, 74, 0.28)');
     soft.addColorStop(1, 'rgba(90, 84, 74, 0)');
     cCtx.beginPath();
     cCtx.ellipse(sox, soy, R * 1.7, R * 1.45, Math.atan2(-dy, -dx), 0, Math.PI * 2);
@@ -737,7 +745,7 @@ function updateSim3(t, dt) {
     cCtx.fill();
 
     const core = cCtx.createRadialGradient(B3.x, B3.y + R * 0.12, R * 0.1, B3.x, B3.y + R * 0.12, R * 0.95);
-    core.addColorStop(0, 'rgba(60, 55, 47, 0.32)');
+    core.addColorStop(0, 'rgba(60, 55, 47, 0.45)');
     core.addColorStop(1, 'rgba(60, 55, 47, 0)');
     cCtx.beginPath();
     cCtx.ellipse(B3.x, B3.y + R * 0.12, R * 0.95, R * 0.82, 0, 0, Math.PI * 2);
