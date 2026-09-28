@@ -219,7 +219,10 @@
         <span class="knob-ring" id="b4Ring"></span><span class="knob-dot"></span>
         <span class="knob-lb">VOL<b id="b4VolN">70</b></span>
       </button>
-      <button class="b4" id="b4-next">NEXT</button>
+      <button class="b4 knob" id="b4-next" aria-label="다음·이전 곡 (돌려서 선택)">
+        <span class="knob-dot"></span>
+        <span class="knob-lb">◀ ▶<b>NEXT</b></span>
+      </button>
       <canvas id="canvas4"></canvas>
       <div class="p4-stat" id="stat4">1단계 · PLAY 차례</div>
     </section>
@@ -228,6 +231,7 @@
         <label for="tilt4">기울기</label>
         <input id="tilt4" type="range" min="-20" max="20" value="0" step="1">
         <button id="calib4">기준 재설정</button>
+        <button id="shake4" title="센서가 없을 때 흔들기를 흉내 냅니다">흔들기</button>
       </div>
       <div class="p4-readout" id="readout4">센서 대기 · 슬라이더로 기울기를 흉내 낼 수 있어요</div>
     </section>
@@ -319,6 +323,10 @@ btnStart.addEventListener('click', async () => {
             : "https 주소로 열어야 센서가 동작합니다.";
         return;
     }
+    // iOS : 흔들기용 가속도 권한도 같은 탭 안에서 동시에 요청 (await 뒤에 부르면 제스처가 끊김)
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        try { DeviceMotionEvent.requestPermission().catch(() => {}); } catch (e) {}
+    }
     let perm = 'not-required';
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
         try { perm = await DeviceOrientationEvent.requestPermission(); }
@@ -326,6 +334,7 @@ btnStart.addEventListener('click', async () => {
     }
     window.removeEventListener('deviceorientation', handleOrientation);
     window.addEventListener('deviceorientation', handleOrientation);
+    enableShake4();
 
     setTimeout(() => {
         if (gotOri) { statusDiv.innerText = "스마트폰을 기울여 공을 굴려보세요!"; return; }
@@ -1146,14 +1155,15 @@ function renderKnob4() {
     `conic-gradient(from -135deg, #7dd3fc 0deg ${deg}deg, rgba(255,255,255,.1) ${deg}deg 270deg, transparent 270deg)`;
   q4('b4-volume').style.setProperty('--ang', (-135 + deg) + 'deg');
 }
-const knob4 = { on:false, pid:null, last:0, moved:0, center:null };
-let advT4 = 0;
-function knobStart4(e, centerFn) {
+const knob4 = { on:false, pid:null, last:0, moved:0, center:null, kind:'volume', ball:false, acc:0 };
+const DETENT4 = 40 * DEG;          // NEXT 다이얼 : 40°마다 한 곡 (시계 = 다음, 반시계 = 이전)
+let nextAng4 = 0;
+function knobStart4(e, centerFn, kind, fromBall) {
   const c = centerFn();
-  knob4.on = true; knob4.pid = e.pointerId; knob4.moved = 0; knob4.center = centerFn;
-  knob4.last = Math.atan2(e.clientY - c.y, e.clientX - c.x);
-  clearTimeout(advT4);
+  Object.assign(knob4, { on:true, pid:e.pointerId, moved:0, center:centerFn, kind, ball:fromBall, acc:0,
+    last:Math.atan2(e.clientY - c.y, e.clientX - c.x) });
 }
+function renderNextKnob4() { q4('b4-next').style.setProperty('--ang', (nextAng4 / DEG).toFixed(1) + 'deg'); }
 window.addEventListener('pointermove', e => {
   if (!knob4.on || e.pointerId !== knob4.pid) return;
   const c = knob4.center();
@@ -1161,17 +1171,68 @@ window.addEventListener('pointermove', e => {
   const a = Math.atan2(e.clientY - c.y, e.clientX - c.x);
   let d = a - knob4.last; d = Math.atan2(Math.sin(d), Math.cos(d));
   knob4.last = a; knob4.moved += Math.abs(d);
-  setVol4(mus4.vol + d / DEG / 270 * 100);
+  if (knob4.kind === 'volume') { setVol4(mus4.vol + d / DEG / 270 * 100); return; }
+  nextAng4 += d; knob4.acc += d; renderNextKnob4();
+  while (Math.abs(knob4.acc) >= DETENT4) {
+    const dir = Math.sign(knob4.acc);
+    knob4.acc -= dir * DETENT4;
+    ensureCtx4(); step4(dir);                // 시계 방향 = NEXT, 반시계 = PREVIOUS
+    vibe([14, 18, 6]);
+    flash4(dir > 0 ? `▶ 다음 곡 · ${STATIONS4[mus4.idx].title}` : `◀ 이전 곡 · ${STATIONS4[mus4.idx].title}`);
+  }
 });
 function knobEnd4(e) {
   if (!knob4.on || e.pointerId !== knob4.pid) return;
   knob4.on = false;
-  if (knob4.moved < 0.12) { flash4('볼륨은 누르지 말고 원을 그리듯 돌려서 조절하세요'); return; }
-  // 볼륨 차례였다면, 손을 떼고 잠시 멈추면 조절 완료로 보고 다음 단계로
-  if (SEQ4[G4.step] === 'volume') advT4 = setTimeout(() => { if (!knob4.on && SEQ4[G4.step] === 'volume') finishStep4(); }, 1200);
+  if (knob4.moved >= 0.12) return;            // 돌렸으면 조절만 하고 단계는 유지
+  // 돌리지 않고 톡 누른 경우
+  if (knob4.ball) { G4.ball.scaleTarget = 1; vibe([14, 20, 8]); setTimeout(finishStep4, 140); }
+  else flash4(knob4.kind === 'volume' ? '볼륨은 원을 그리듯 돌려서 조절하세요'
+                                       : '시계 방향으로 돌리면 다음 곡, 반대로 돌리면 이전 곡이에요');
 }
 window.addEventListener('pointerup', knobEnd4);
 window.addEventListener('pointercancel', knobEnd4);
+
+/* ── 흔들기 : 휴대폰을 흔들면 다음 단계로 ──
+   devicemotion의 가속도(중력 제외)가 짧은 간격으로 3번 크게 튀면 '흔들기'로 판정.
+   devicemotion이 없는 기기는 방향값이 급변하는 것으로 대신 판정 */
+const shake4 = { peaks:[], last:0, gotMotion:false, prevO:null };
+function shakePeak4() {
+  const now = performance.now();
+  if (now - shake4.last < 1200) return;
+  shake4.peaks = shake4.peaks.filter(t => now - t < 800);
+  if (shake4.peaks.length && now - shake4.peaks[shake4.peaks.length - 1] < 110) return;
+  shake4.peaks.push(now);
+  if (shake4.peaks.length >= 3) { shake4.peaks = []; shake4.last = now; onShake4(); }
+}
+function onMotion4(e) {
+  const a = e.acceleration; let m;
+  if (a && typeof a.x === 'number') m = Math.hypot(a.x, a.y, a.z || 0);
+  else {
+    const g = e.accelerationIncludingGravity; if (!g || typeof g.x !== 'number') return;
+    m = Math.abs(Math.hypot(g.x, g.y, g.z || 0) - 9.81);
+  }
+  shake4.gotMotion = true;
+  if (m > 14) shakePeak4();
+}
+function onOriShake4(e) {
+  if (shake4.gotMotion || typeof e.beta !== 'number') return;
+  const p = shake4.prevO; shake4.prevO = { b:e.beta, g:e.gamma };
+  if (p && Math.abs(e.beta - p.b) + Math.abs(e.gamma - p.g) > 22) shakePeak4();
+}
+function enableShake4() {
+  window.removeEventListener('devicemotion', onMotion4);
+  window.addEventListener('devicemotion', onMotion4);
+  window.removeEventListener('deviceorientation', onOriShake4);
+  window.addEventListener('deviceorientation', onOriShake4);
+}
+function onShake4() {
+  if (activeSim !== 4 || !G4.inited) return;
+  knob4.on = false; G4.pressing = false;
+  vibe([30, 40, 30]);
+  finishStep4();
+  flash4(`흔들기 감지 · ${G4.step + 1}단계 ${LB4[SEQ4[G4.step]]}로 넘어갔어요`);
+}
 
 /* ── 스테이지 / 상태 ── */
 const stage4 = q4('stage4'), cv4 = q4('canvas4'), ctx4 = cv4.getContext('2d'), zone4 = q4('zone4');
@@ -1207,7 +1268,7 @@ function resize4() {
   cv4.width = w * dpr; cv4.height = h * dpr; ctx4.setTransform(dpr, 0, 0, dpr, 0, 0);
   SEQ4.forEach(id => { const c = homeC4(id); placeBtn4(id, c.x, c.y, true); });
   const B = G4.ball;
-  if (!G4.inited) { G4.inited = true; activate4(); }
+  if (!G4.inited) { G4.inited = true; activate4(true); }
   else if (G4.settled) { const z = zoneC4(); B.x = z.x; B.y = z.y; }
   else { B.x = clamp4(B.x, R4, W4 - R4); B.y = clamp4(B.y, R4, H4 - R4); }
 }
@@ -1218,11 +1279,12 @@ let flashT4 = 0;
 function flash4(msg) { G4.statKey = 'flash'; stat4.textContent = msg; clearTimeout(flashT4); flashT4 = setTimeout(() => { G4.statKey = ''; }, 2600); }
 
 // 차례가 된 버튼 → 금속 구슬로 변신 (제자리에서 톡 튀어나오듯)
-function activate4() {
-  const id = SEQ4[G4.step], B = G4.ball, c = homeC4(id);
+function activate4(startInZone) {
+  const id = SEQ4[G4.step], B = G4.ball, c = startInZone ? zoneC4() : homeC4(id);
   B.x = c.x; B.y = c.y; B.vx = B.vy = 0;
   B.scale = .72; B.scaleVel = 0; B.scaleTarget = 1;
-  G4.settled = false; G4.inZone = false; zone4.classList.remove('lit');
+  G4.settled = !!startInZone; G4.inZone = !!startInZone;
+  zone4.classList.toggle('lit', !!startInZone);
   BTN4[id].classList.add('as-ball');
   vibe(6);
 }
@@ -1244,11 +1306,11 @@ function run4(id) {
 }
 
 /* ── 입력 : 버튼(평소 상태) ── */
-['play', 'next'].forEach(id => BTN4[id].addEventListener('pointerdown', e => { e.preventDefault(); run4(id); vibe(8); }));
-BTN4.volume.addEventListener('pointerdown', e => {
+BTN4.play.addEventListener('pointerdown', e => { e.preventDefault(); run4('play'); vibe(8); });
+['volume', 'next'].forEach(id => BTN4[id].addEventListener('pointerdown', e => {
   e.preventDefault();
-  knobStart4(e, () => { const r = BTN4.volume.getBoundingClientRect(); return { x:r.left + r.width / 2, y:r.top + r.height / 2 }; });
-});
+  knobStart4(e, () => { const r = BTN4[id].getBoundingClientRect(); return { x:r.left + r.width / 2, y:r.top + r.height / 2 }; }, id, false);
+}));
 
 /* ── 입력 : 금속 구슬 (캔버스 위, 캡처 단계에서 먼저 판정) ── */
 stage4.addEventListener('pointerdown', e => {
@@ -1257,8 +1319,8 @@ stage4.addEventListener('pointerdown', e => {
   if (Math.hypot(mx - B.x, my - B.y) > R4 * B.scale * 1.25) return;
   e.preventDefault(); e.stopPropagation();
   const id = SEQ4[G4.step];
-  if (id === 'volume') {
-    knobStart4(e, () => { const rr = stage4.getBoundingClientRect(); return { x:rr.left + B.x, y:rr.top + B.y }; });
+  if (id === 'volume' || id === 'next') {       // 로터리 구슬 : 돌리면 조절, 톡 누르면 다음 단계
+    knobStart4(e, () => { const rr = stage4.getBoundingClientRect(); return { x:rr.left + B.x, y:rr.top + B.y }; }, id, true);
     B.scaleTarget = 1.08;
     return;
   }
@@ -1274,6 +1336,7 @@ window.addEventListener('pointerup', () => {
 window.addEventListener('pointercancel', () => { G4.pressing = false; G4.ball.scaleTarget = 1; });
 
 slider4.addEventListener('input', () => { if (!gotOri) G4.armed = true; });
+q4('shake4').addEventListener('click', () => { shake4.last = 0; onShake4(); });
 q4('calib4').addEventListener('click', () => { G4.base = null; G4.armed = true; flash4('지금 들고 있는 자세를 수평(0°)으로 잡았어요'); });
 
 /* ── 기울기 : 화면 평면 위 중력 방향 (beta·gamma를 합쳐 계산 → 세워 들어도 안정) ── */
@@ -1356,8 +1419,10 @@ function updateSim4(t, dt) {
   } else {
     const z = zoneC4(); B.x = z.x; B.y = z.y;
     if (G4.statKey !== 'flash') setStat4('set' + n, id === 'volume'
-      ? `${n}단계 · VOLUME 안착 · 구슬을 돌려 볼륨을 조절하세요`
-      : `${n}단계 · ${LB} 안착 · 구슬을 눌러 실행하세요`);
+      ? `${n}단계 · VOLUME 안착 · 돌려서 볼륨 조절 · 누르거나 흔들면 다음`
+      : id === 'next'
+        ? `${n}단계 · NEXT 안착 · 시계 방향 다음 곡 / 반대 이전 곡 · 누르거나 흔들면 다음`
+        : `${n}단계 · PLAY 안착 · 눌러서 재생 · 흔들면 다음 단계`);
   }
 
   updateScaleSpring(B);
@@ -1410,8 +1475,23 @@ function draw4(t) {
     ctx4.shadowBlur = 0;
     engrave4(String(Math.round(mus4.vol)), B.x, B.y + 1, '800 17px system-ui, sans-serif');
     engrave4('VOL', B.x, B.y - 15 * B.scale, '700 10px system-ui, sans-serif');
+  } else if (id === 'next') {
+    for (let k = 0; k < 28; k++) {
+      const a = nextAng4 + k / 28 * Math.PI * 2;
+      ctx4.strokeStyle = 'rgba(20,26,32,.35)'; ctx4.lineWidth = 1.2;
+      ctx4.beginPath();
+      ctx4.moveTo(B.x + Math.cos(a) * R * 0.8, B.y + Math.sin(a) * R * 0.8);
+      ctx4.lineTo(B.x + Math.cos(a) * R * 0.93, B.y + Math.sin(a) * R * 0.93);
+      ctx4.stroke();
+    }
+    const ai = nextAng4 - Math.PI / 2;
+    ctx4.fillStyle = '#7dd3fc'; ctx4.shadowColor = 'rgba(125,211,252,.9)'; ctx4.shadowBlur = 6;
+    ctx4.beginPath(); ctx4.arc(B.x + Math.cos(ai) * R * 0.66, B.y + Math.sin(ai) * R * 0.66, 3.2, 0, Math.PI * 2); ctx4.fill();
+    ctx4.shadowBlur = 0;
+    engrave4('NEXT', B.x, B.y + 2, '800 14px system-ui, sans-serif');
+    engrave4('◀     ▶', B.x, B.y + 17 * B.scale, '700 9px system-ui, sans-serif');
   } else {
-    engrave4(id === 'play' ? (mus4.playing ? 'PAUSE' : 'PLAY') : 'NEXT', B.x, B.y, '800 14px system-ui, sans-serif');
+    engrave4(mus4.playing ? 'PAUSE' : 'PLAY', B.x, B.y, '800 14px system-ui, sans-serif');
   }
   ctx4.restore();
 }
@@ -1421,7 +1501,7 @@ function engrave4(txt, x, y, font) {
   ctx4.fillStyle = 'rgba(22,28,36,.82)'; ctx4.fillText(txt, x, y);
 }
 
-renderKnob4(); render4Music();
+renderKnob4(); renderNextKnob4(); render4Music();
 setTimeout(warm4, 800);
 
 </script>
