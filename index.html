@@ -94,6 +94,87 @@
     /* 시뮬레이터-3 : 하얀 천 캔버스 */
     #panel3 { background: #efede8; }
     #cloth-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .tab { white-space: nowrap; letter-spacing: -0.3px; }
+
+    /* 시뮬레이터-4 : Adaptive Gravity Music (자이로 뮤직 인터랙션) */
+    #panel4 { background: #0b0d12; }
+    .p4-wrap {
+        position: absolute; inset: 0; display: flex; flex-direction: column;
+        padding: 56px 0 50px; text-align: left; box-sizing: border-box;
+    }
+    .np4 {
+        display: flex; align-items: center; gap: 12px; margin: 4px 14px 0;
+        padding: 10px 12px; border-radius: 18px;
+        background: linear-gradient(180deg, #151923, #0f1219);
+        border: 1px solid rgba(255,255,255,.07);
+    }
+    .np4 img { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; background: #1a1c22; flex: none; }
+    .np4-meta { flex: 1; min-width: 0; }
+    .np4-t { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .np4-a { font-size: 13px; color: #9aa3b2; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .np4-bar { height: 3px; border-radius: 3px; background: rgba(255,255,255,.12); margin-top: 7px; overflow: hidden; }
+    .np4-bar i { display: block; height: 100%; width: 0; background: #7dd3fc; transition: width .4s linear; }
+    .np4-vol { font-size: 15px; font-weight: 700; color: #7dd3fc; min-width: 46px; text-align: right; font-variant-numeric: tabular-nums; }
+
+    .p4-stage {
+        position: relative; flex: 1; min-height: 0; margin: 10px 14px 0; border-radius: 26px; overflow: hidden;
+        background:
+            radial-gradient(circle at 74% 82%, rgba(125,211,252,.10), transparent 26%),
+            linear-gradient(180deg, #10141d, #0b0e14);
+        border: 1px solid rgba(255,255,255,.06);
+    }
+    #canvas4 { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+    .p4-zone {
+        position: absolute; right: 18px; bottom: 24px; width: 132px; height: 132px; z-index: 1;
+        border: 1.5px dashed rgba(125,211,252,.45); border-radius: 50%;
+        display: flex; align-items: center; justify-content: center; text-align: center;
+        color: #8cc9e8; font-size: 12px; pointer-events: none;
+        transition: box-shadow .35s, border-color .35s, background .35s;
+    }
+    .p4-zone.lit {
+        border-style: solid; border-color: rgba(125,211,252,.8);
+        background: radial-gradient(circle, rgba(0,0,0,.35) 30%, rgba(125,211,252,.08) 70%);
+        box-shadow: 0 0 0 6px rgba(125,211,252,.12), inset 0 6px 14px rgba(0,0,0,.55);
+    }
+    .b4 {
+        position: absolute; width: 84px; height: 84px; border-radius: 50%; z-index: 2;
+        border: 1px solid rgba(255,255,255,.1);
+        background: linear-gradient(180deg, #222838, #171c28);
+        color: #fff; display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 14px; letter-spacing: .2px; font-family: inherit;
+        box-shadow: 0 8px 26px rgba(0,0,0,.35);
+        transition: left .55s cubic-bezier(.2,.85,.25,1), top .55s cubic-bezier(.2,.85,.25,1),
+                    transform .22s ease, opacity .18s ease;
+        user-select: none; -webkit-user-select: none; touch-action: none; cursor: pointer; padding: 0;
+    }
+    .b4:active { transform: scale(.94); }
+    .b4.as-ball { opacity: 0; pointer-events: none; }
+    .knob-ring {
+        position: absolute; inset: -7px; border-radius: 50%; pointer-events: none;
+        -webkit-mask: radial-gradient(circle, transparent 44.5px, #000 45.5px);
+                mask: radial-gradient(circle, transparent 44.5px, #000 45.5px);
+    }
+    .knob-dot {
+        position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px;
+        border-radius: 50%; background: #7dd3fc; box-shadow: 0 0 6px rgba(125,211,252,.8);
+        transform: rotate(var(--ang, 0deg)) translateY(-31px); pointer-events: none;
+    }
+    .knob-lb { display: flex; flex-direction: column; align-items: center; line-height: 1.1; font-size: 11px; color: #9aa3b2; pointer-events: none; }
+    .knob-lb b { font-size: 17px; color: #fff; font-variant-numeric: tabular-nums; }
+    .p4-stat {
+        position: absolute; left: 16px; right: 16px; top: 14px; z-index: 4; pointer-events: none;
+        font-size: 14px; color: #d6dbe6; line-height: 1.45;
+    }
+    .p4-ctrl { padding: 10px 16px 0; }
+    .p4-row { display: flex; align-items: center; gap: 10px; }
+    .p4-row label { font-size: 13px; color: #9aa3b2; white-space: nowrap; }
+    .p4-row input[type=range] { flex: 1; min-width: 0; }
+    .p4-row button {
+        flex: none; border: 0; border-radius: 12px; padding: 9px 12px; font: inherit; font-size: 13px; font-weight: 700;
+        background: rgba(255,255,255,.1); color: #fff; cursor: pointer;
+    }
+    .p4-readout { margin-top: 8px; font-size: 13px; color: #9aa3b2; line-height: 1.45; font-variant-numeric: tabular-nums; }
+    .p4-readout b { color: #7dd3fc; }
 </style>
 </head>
 <body>
@@ -102,6 +183,7 @@
     <button class="tab active" data-sim="1">시뮬레이터-1</button>
     <button class="tab" data-sim="2">시뮬레이터-2</button>
     <button class="tab" data-sim="3">시뮬레이터-3</button>
+    <button class="tab" data-sim="4">시뮬레이터-4</button>
 </div>
 
 <button id="btn-start">프로그램 시작하기 (권한 허용)</button>
@@ -117,6 +199,39 @@
 
 <div class="panel" id="panel3">
     <canvas id="cloth-canvas"></canvas>
+</div>
+
+<div class="panel" id="panel4">
+  <div class="p4-wrap">
+    <div class="np4">
+      <img id="np4Art" alt="">
+      <div class="np4-meta">
+        <div class="np4-t" id="np4Title"></div>
+        <div class="np4-a" id="np4Artist"></div>
+        <div class="np4-bar"><i id="np4Prog"></i></div>
+      </div>
+      <div class="np4-vol" id="np4Vol">70%</div>
+    </div>
+    <section class="p4-stage" id="stage4">
+      <div class="p4-zone" id="zone4">THUMB<br>ZONE</div>
+      <button class="b4" id="b4-play">PLAY</button>
+      <button class="b4 knob" id="b4-volume" aria-label="볼륨 (돌려서 조절)">
+        <span class="knob-ring" id="b4Ring"></span><span class="knob-dot"></span>
+        <span class="knob-lb">VOL<b id="b4VolN">70</b></span>
+      </button>
+      <button class="b4" id="b4-next">NEXT</button>
+      <canvas id="canvas4"></canvas>
+      <div class="p4-stat" id="stat4">1단계 · PLAY 차례</div>
+    </section>
+    <section class="p4-ctrl">
+      <div class="p4-row">
+        <label for="tilt4">기울기</label>
+        <input id="tilt4" type="range" min="-20" max="20" value="0" step="1">
+        <button id="calib4">기준 재설정</button>
+      </div>
+      <div class="p4-readout" id="readout4">센서 대기 · 슬라이더로 기울기를 흉내 낼 수 있어요</div>
+    </section>
+  </div>
 </div>
 
 <script>
@@ -165,48 +280,77 @@ document.querySelectorAll('.tab').forEach(tab => {
         activeSim = parseInt(tab.dataset.sim);
         document.getElementById('panel' + activeSim).classList.add('active');
         statusDiv.classList.toggle('on-light', activeSim === 3);
+        if (activeSim === 4) { requestAnimationFrame(resize4); warm4(); }
+        else if (mus4.playing) pause4();
     });
 });
 
 /* ═════════════════════════════════════════════
    시작 : 움직임 센서 권한
 ═════════════════════════════════════════════ */
+/* [수정] requestPermission()은 이제 iOS 전용이 아님.
+   안드로이드 Chrome 150+도 같은 함수를 갖고 있고, 사이트의 '동작 센서' 권한이 차단돼 있으면
+   팝업 없이 곧바로 "denied"를 돌려준다. 기존 코드는 이를 '거부'로 보고 리스너조차 달지 않았다.
+   → 결과와 상관없이 리스너를 달고, 1.5초 안에 실제 값이 오는지로 판단한 뒤 원인을 정확히 안내한다. */
+let gotOri = false, oriBeta = 0, oriGamma = 0;
+const UA = navigator.userAgent;
+const isIOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isAndroid = /Android/i.test(UA);
+function howToAllow() {
+    if (isIOS) return "iPhone: 설정 › 앱 › Safari › '동작 및 방향 접근'을 켠 뒤 새로고침하세요.";
+    if (/SamsungBrowser/i.test(UA)) return "삼성 인터넷: 주소창 왼쪽 자물쇠 › 권한 › '동작 센서' 허용 후 새로고침하세요.";
+    if (isAndroid) return "Chrome: 주소창 왼쪽 아이콘 › 권한 › '동작 센서' 허용 (또는 설정 › 사이트 설정 › 동작 센서) 후 새로고침하세요.";
+    return "PC에는 자이로 센서가 없습니다. 마우스(1~3번) 또는 슬라이더(4번)로 확인하세요.";
+}
 btnStart.addEventListener('click', async () => {
     btnStart.style.display = 'none';
-    statusDiv.innerText = "센서 활성화 중...";
+    statusDiv.innerText = "센서 확인 중...";
     started = true;
 
     // 사용자 제스처 안에서 진동 API를 한 번 호출해 잠금 해제
     if (hasVibrate) {
         try { navigator.vibrate(1); vibeUnlocked = true; } catch (e) {}
     }
+    ensureCtx4(); warm4();
 
-    if (typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function') {
-        try {
-            const state = await DeviceOrientationEvent.requestPermission();
-            if (state === 'granted') {
-                window.addEventListener('deviceorientation', handleOrientation);
-                statusDiv.innerText = "스마트폰을 기울여 공을 굴려보세요!";
-            } else {
-                statusDiv.innerText = "센서 권한이 거부되었습니다.";
-            }
-        } catch (e) { statusDiv.innerText = "센서 권한이 거부되었습니다."; }
-    } else {
-        window.addEventListener('deviceorientation', handleOrientation);
-        statusDiv.innerText = "스마트폰을 기울여 공을 굴려보세요!";
+    if (typeof DeviceOrientationEvent === 'undefined') {
+        statusDiv.innerText = window.isSecureContext
+            ? "이 브라우저는 방향 센서를 지원하지 않습니다."
+            : "https 주소로 열어야 센서가 동작합니다.";
+        return;
     }
+    let perm = 'not-required';
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try { perm = await DeviceOrientationEvent.requestPermission(); }
+        catch (e) { perm = 'error'; }
+    }
+    window.removeEventListener('deviceorientation', handleOrientation);
+    window.addEventListener('deviceorientation', handleOrientation);
+
+    setTimeout(() => {
+        if (gotOri) { statusDiv.innerText = "스마트폰을 기울여 공을 굴려보세요!"; return; }
+        let msg;
+        if (!window.isSecureContext) msg = "https가 아닌 주소라 센서가 막혔습니다. https 주소로 여세요.";
+        else if (window.self !== window.top) msg = "다른 페이지 안(iframe)에 들어 있어 센서가 막혔습니다. 단독 탭으로 여세요.";
+        else if (perm === 'denied' || perm === 'error') msg = "동작 센서 권한이 차단돼 있습니다. " + howToAllow();
+        else if (!isAndroid && !isIOS) msg = howToAllow();
+        else msg = "센서 값이 오지 않습니다. 카카오톡 등 앱 내 브라우저라면 Chrome으로 여시고, 빠른 설정의 '센서 끄기'를 확인하세요.";
+        statusDiv.innerText = msg;
+        btnStart.textContent = "권한 허용 후 다시 시도";
+        btnStart.style.display = '';
+    }, 1500);
 });
 
 function handleOrientation(event) {
-    if (event.gamma === null) return;
-    rawGamma = event.gamma;
-    rawBeta  = event.beta;
+    if (typeof event.gamma !== 'number' || typeof event.beta !== 'number') return;
+    gotOri = true;
+    rawGamma = oriGamma = event.gamma;
+    rawBeta  = oriBeta  = event.beta;
 }
 
 // 데스크톱 미리보기 : 마우스로 기울기 흉내
 window.addEventListener('mousemove', (e) => {
-    if (!started) return;
+    if (!started || gotOri) return;
     rawGamma = ((e.clientX / window.innerWidth)  - 0.5) * 60;
     rawBeta  = ((e.clientY / window.innerHeight) - 0.5) * 60;
 });
@@ -389,6 +533,7 @@ function loop(t) {
     if (activeSim === 1 && started) updateSim1();
     if (activeSim === 2)            updateSim2(t, dt);
     if (activeSim === 3)            updateSim3(t, dt);
+    if (activeSim === 4)            updateSim4(t, dt);
 
     requestAnimationFrame(loop);
 }
@@ -826,6 +971,459 @@ cCanvas.addEventListener('pointerdown', (e) => {
 });
 ['pointerup', 'pointercancel'].forEach(ev =>
     cCanvas.addEventListener(ev, () => { B3.scaleTarget = 1; }));
+
+/* ═════════════════════════════════════════════
+   시뮬레이터-4 : Adaptive Gravity Music
+   · 기본은 PLAY / VOLUME / NEXT 버튼 그대로
+   · 차례가 된 버튼만 크롬 금속 구슬로 바뀜 (시뮬레이터-2와 같은 렌더러)
+   · 기울이면 실제로 굴러가고, Thumb Zone의 오목한 홈에 빨려 들어가 안착
+   · PLAY = 재생/일시정지, NEXT = 다음 곡, VOLUME = 돌려서 조절하는 다이얼
+═════════════════════════════════════════════ */
+const q4 = id => document.getElementById(id);
+const clamp4 = (v, a, b) => Math.max(a, Math.min(b, v));
+const DEG = Math.PI / 180;
+
+/* ── 음악 (TV 시뮬레이터 v207의 힐링 뮤직 스테이션 링크) ── */
+const MZ4 = 'lp_violin-concertos_wolfgang-amadeus-mozart-wolfgang-schneider/';
+const mz4 = p => ['https://dn720307.ca.archive.org/0/items/' + MZ4 + p, 'https://archive.org/download/' + MZ4 + p];
+const STATIONS4 = [
+  { title:'새벽의 현 (Strings at Dawn)', artist:'스트링 아틀리에', img:'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=300&auto=format&fit=crop',
+    srcs: mz4('disc1/01.02.%20Concerto%20For%20Violin%20%26%20Orchestra%20No.%201%20B%20Flat%20Major%2C%20K%20207%3A%202nd%20Mov.%3A%20Adagio.mp3') },
+  { title:'유리 정원 (Glass Garden)', artist:'노바 체임버 앙상블', img:'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=80&w=300&auto=format&fit=crop',
+    srcs: mz4('disc1/02.02.%20Concerto%20For%20Violin%20%26%20Orchestra%20No.%202%20In%20D%20Major%2C%20K%20211%3A%202nd%20Mov.%3A%20Andante.mp3') },
+  { title:'먼 바다의 편지 (Letter from the Sea)', artist:'아틀리에 솔', img:'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?q=80&w=300&auto=format&fit=crop',
+    srcs: mz4('disc3/05.03.%20Concerto%20For%20Violin%20%26%20Orchestra%20No.%204%20In%20D%20Major%2C%20K%20218%3A%203rd%20Mov.%3A%20Rondeau%3A%20Andante%20Grazioso%20-%20Allegro%20Ma%20Non%20Troppo.mp3') },
+  { title:'흐르는 계단 (Flowing Stairs)', artist:'루미너스 스트링스', img:'https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?q=80&w=300&auto=format&fit=crop',
+    srcs: mz4('disc3/06.03.%20Concerto%20For%20Violin%20%26%20Orchestra%20No.%205%20In%20A%20Major%20K%20219%3A%203rd%20Mov.%3A%20Rondeau%3A%20Tempo%20di%20Menuetto%20-%20Allegro.mp3') },
+  { title:'창가의 오후 (Afternoon by the Window)', artist:'카펠라 리브레', img:'https://images.unsplash.com/photo-1551244072-5d12893278ab?q=80&w=300&auto=format&fit=crop',
+    srcs: mz4('disc2/04.01.%20Adagio%20For%20Violin%20In%20E%20Major%2C%20K%20261.mp3') }
+];
+const IMG4_FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><defs><linearGradient id="g" x2="1" y2="1"><stop offset="0" stop-color="#3b3f73"/><stop offset="1" stop-color="#1b6a6a"/></linearGradient></defs><rect width="1" height="1" fill="url(#g)"/></svg>');
+
+const mus4 = { idx:0, vol:70, playing:false, fails:0, pending:false };
+const aud4 = STATIONS4.map(() => null), src4 = STATIONS4.map(() => 0);
+let actx4 = null, bridge4 = null;
+
+function ensureCtx4() {
+  if (!actx4) { const C = window.AudioContext || window.webkitAudioContext; if (C) { try { actx4 = new C(); } catch (_) {} } }
+  if (actx4 && actx4.state === 'suspended') actx4.resume().catch(() => {});
+  return actx4;
+}
+function station4(i) {
+  if (aud4[i]) return aud4[i];
+  const a = new Audio();
+  a.loop = true; a.preload = 'metadata'; a._i = i; a._cors = true; a.crossOrigin = 'anonymous';
+  a.addEventListener('error', () => onErr4(a));
+  a.addEventListener('canplay', () => hook4(a));
+  a.addEventListener('playing', () => { if (a._i === mus4.idx) { mus4.fails = 0; bridgeStop4(); fadeIn4(a); } });
+  a.src = STATIONS4[i].srcs[src4[i]];
+  aud4[i] = a; applyVol4();
+  return a;
+}
+function onErr4(a) {
+  const i = a._i, st = STATIONS4[i], live = i === mus4.idx && mus4.playing;
+  if (a._cors && !a._hooked) {            // CORS 거부 → 같은 주소를 일반 모드로
+    a._cors = false; a.removeAttribute('crossorigin'); a.src = st.srcs[src4[i]]; if (live) play4(); return;
+  }
+  if (src4[i] < st.srcs.length - 1) {      // 예비 주소로
+    src4[i]++; a.src = st.srcs[src4[i]]; if (live) play4(); return;
+  }
+  if (!live) return;
+  if (++mus4.fails >= STATIONS4.length) { bridgeStop4(); flash4('음악 서버에 연결할 수 없어요. 네트워크를 확인해 주세요'); return; }
+  flash4(`'${st.title}'을(를) 불러오지 못해 다음 곡으로 넘어가요`); step4(1);
+}
+// CORS로 불러온 스트림만 Web Audio에 연결 (iOS에서도 볼륨이 먹도록 GainNode 사용 + 앞부분 무음 감지)
+function hook4(a) {
+  if (a._hooked || !a._cors || !actx4 || a.readyState < 2) return;
+  try {
+    const src = actx4.createMediaElementSource(a), g = actx4.createGain(), an = actx4.createAnalyser();
+    an.fftSize = 1024; src.connect(g); g.connect(an); an.connect(actx4.destination);
+    a._hooked = true; a._gain = g; a._an = an; a._buf = new Float32Array(an.fftSize);
+    applyVol4();
+  } catch (_) {}
+}
+function applyVol4() {
+  const v = mus4.vol / 100;
+  aud4.forEach(a => {
+    if (!a) return;
+    if (a._hooked) { a.volume = 1; if (!a._fading) a._gain.gain.setTargetAtTime(v, actx4.currentTime, .05); }
+    else a.volume = v;
+  });
+  if (bridge4 && actx4) bridge4.g.gain.setTargetAtTime(v * .12, actx4.currentTime, .1);
+}
+function fadeIn4(a) {
+  if (!a._hooked || !actx4) return;
+  a._fading = true;
+  const g = a._gain.gain; g.cancelScheduledValues(actx4.currentTime); g.setValueAtTime(0, actx4.currentTime);
+  g.setTargetAtTime(mus4.vol / 100, actx4.currentTime, .3);
+  setTimeout(() => { a._fading = false; applyVol4(); }, 1400);
+}
+// 스트림이 준비되기 전 공백을 메우는 잔잔한 패드음 → PLAY를 누르는 순간 소리가 난다
+function bridgeStart4() {
+  const c = ensureCtx4(); if (!c || bridge4) return;
+  const g = c.createGain(); g.gain.value = 0;
+  const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1100; lp.connect(g); g.connect(c.destination);
+  const oscs = [220, 277.18, 329.63, 440].map((hz, k) => {
+    const o = c.createOscillator(), og = c.createGain();
+    o.type = k % 2 ? 'triangle' : 'sine'; o.frequency.value = hz; o.detune.value = (k - 1.5) * 5; og.gain.value = .22;
+    o.connect(og); og.connect(lp); o.start(); return o;
+  });
+  g.gain.setTargetAtTime(mus4.vol / 100 * .12, c.currentTime, .08);
+  bridge4 = { g, oscs };
+}
+function bridgeStop4() {
+  if (!bridge4 || !actx4) return;
+  const b = bridge4; bridge4 = null;
+  b.g.gain.cancelScheduledValues(actx4.currentTime); b.g.gain.setTargetAtTime(0, actx4.currentTime, .35);
+  setTimeout(() => b.oscs.forEach(o => { try { o.stop(); } catch (_) {} }), 2200);
+}
+function warm4() {
+  const cur = station4(mus4.idx); cur.preload = 'auto';
+  const nx = station4((mus4.idx + 1) % STATIONS4.length); nx.preload = 'auto';
+  if (cur.readyState === 0) { try { cur.load(); } catch (_) {} }
+}
+function play4() {
+  const a = station4(mus4.idx);
+  a.preload = 'auto'; a._loud = 0;
+  ensureCtx4(); hook4(a);
+  mus4.playing = true; mus4.pending = false;
+  if (a.readyState < 3) bridgeStart4();
+  applyVol4();
+  const p = a.play();
+  if (p && p.catch) p.catch(e => { if (e && e.name === 'NotAllowedError') { mus4.pending = true; flash4('한 번 더 누르면 음악이 재생돼요'); } });
+  warm4(); render4Music();
+}
+function pause4() {
+  mus4.playing = false; mus4.pending = false;
+  aud4.forEach(a => a && a.pause()); bridgeStop4(); render4Music();
+}
+function step4(d) {
+  const old = aud4[mus4.idx]; if (old) old.pause();
+  mus4.idx = (mus4.idx + d + STATIONS4.length) % STATIONS4.length;
+  play4();
+}
+// 앞부분 무음 건너뛰기 (LP 음원 도입부) : 재생 초반 25초 안에서 소리가 거의 없으면 1.5초씩 이동
+setInterval(() => {
+  if (!mus4.playing) return;
+  const a = aud4[mus4.idx]; if (!a || a.paused || !a._an || a._skipDone || a.readyState < 3) return;
+  if (a.currentTime > 25) { a._skipDone = true; return; }
+  a._an.getFloatTimeDomainData(a._buf); let sum = 0;
+  for (let k = 0; k < a._buf.length; k++) sum += a._buf[k] * a._buf[k];
+  if (Math.sqrt(sum / a._buf.length) < .004) { a._loud = 0; try { a.currentTime += 1.5; } catch (_) {} }
+  else if (++a._loud >= 3) a._skipDone = true;
+}, 150);
+// iOS 등에서 첫 재생이 막히면 다음 손가락 떼기/클릭 때 다시 시도
+['pointerup', 'click'].forEach(ev => window.addEventListener(ev, () => {
+  if (mus4.pending) play4();
+  else if (actx4 && actx4.state === 'suspended' && mus4.playing) actx4.resume().catch(() => {});
+}, true));
+window.addEventListener('pointerdown', () => { if (hasVibrate) vibeUnlocked = true; }, true);
+
+function render4Music() {
+  const st = STATIONS4[mus4.idx], img = q4('np4Art');
+  img.onerror = () => { img.onerror = null; img.src = IMG4_FALLBACK; };
+  if (img.getAttribute('src') !== st.img) img.src = st.img;
+  q4('np4Title').textContent = (mus4.playing ? '♪ ' : '') + st.title;
+  q4('np4Artist').textContent = `${st.artist} · ${mus4.idx + 1}/${STATIONS4.length}`;
+  q4('b4-play').textContent = mus4.playing ? 'PAUSE' : 'PLAY';
+}
+setInterval(() => {
+  const a = aud4[mus4.idx];
+  const dur = a && isFinite(a.duration) ? a.duration : 0;
+  q4('np4Prog').style.width = dur ? (a.currentTime / dur * 100).toFixed(1) + '%' : '0%';
+}, 500);
+
+/* ── 볼륨 다이얼 (누르지 않고 돌려서 조절 : 270° = 0~100%) ── */
+function setVol4(v) {
+  const nv = clamp4(v, 0, 100);
+  if (Math.floor(nv / 5) !== Math.floor(mus4.vol / 5)) vibe(4);   // 5%마다 톡 (다이얼 딸깍)
+  mus4.vol = nv; applyVol4(); renderKnob4();
+}
+function renderKnob4() {
+  const v = Math.round(mus4.vol), deg = v / 100 * 270;
+  q4('b4VolN').textContent = v; q4('np4Vol').textContent = v + '%';
+  q4('b4Ring').style.background =
+    `conic-gradient(from -135deg, #7dd3fc 0deg ${deg}deg, rgba(255,255,255,.1) ${deg}deg 270deg, transparent 270deg)`;
+  q4('b4-volume').style.setProperty('--ang', (-135 + deg) + 'deg');
+}
+const knob4 = { on:false, pid:null, last:0, moved:0, center:null };
+let advT4 = 0;
+function knobStart4(e, centerFn) {
+  const c = centerFn();
+  knob4.on = true; knob4.pid = e.pointerId; knob4.moved = 0; knob4.center = centerFn;
+  knob4.last = Math.atan2(e.clientY - c.y, e.clientX - c.x);
+  clearTimeout(advT4);
+}
+window.addEventListener('pointermove', e => {
+  if (!knob4.on || e.pointerId !== knob4.pid) return;
+  const c = knob4.center();
+  if (Math.hypot(e.clientX - c.x, e.clientY - c.y) < 10) return;   // 중심 근처는 각도가 튀므로 무시
+  const a = Math.atan2(e.clientY - c.y, e.clientX - c.x);
+  let d = a - knob4.last; d = Math.atan2(Math.sin(d), Math.cos(d));
+  knob4.last = a; knob4.moved += Math.abs(d);
+  setVol4(mus4.vol + d / DEG / 270 * 100);
+});
+function knobEnd4(e) {
+  if (!knob4.on || e.pointerId !== knob4.pid) return;
+  knob4.on = false;
+  if (knob4.moved < 0.12) { flash4('볼륨은 누르지 말고 원을 그리듯 돌려서 조절하세요'); return; }
+  // 볼륨 차례였다면, 손을 떼고 잠시 멈추면 조절 완료로 보고 다음 단계로
+  if (SEQ4[G4.step] === 'volume') advT4 = setTimeout(() => { if (!knob4.on && SEQ4[G4.step] === 'volume') finishStep4(); }, 1200);
+}
+window.addEventListener('pointerup', knobEnd4);
+window.addEventListener('pointercancel', knobEnd4);
+
+/* ── 스테이지 / 상태 ── */
+const stage4 = q4('stage4'), cv4 = q4('canvas4'), ctx4 = cv4.getContext('2d'), zone4 = q4('zone4');
+const slider4 = q4('tilt4'), readout4 = q4('readout4'), stat4 = q4('stat4');
+const SEQ4 = ['play', 'volume', 'next'];
+const LB4 = { play:'PLAY', volume:'VOLUME', next:'NEXT' };
+const HOME4 = { play:{ fx:.22, fy:.24 }, volume:{ fx:.56, fy:.43 }, next:{ fx:.26, fy:.66 } };
+const BTN4 = {}; SEQ4.forEach(id => { BTN4[id] = q4('b4-' + id); });
+const R4 = 42;
+const TRIG4 = 3;          // 이 각도 미만의 기울기로는 구슬이 출발하지 않음 (정지 마찰)
+const G4 = {
+  step:0, ball:makeBallState(), inited:false,
+  armed:true, settled:false, inZone:false, pressing:false,
+  ax:0, ay:0, base:null, rollTick:0, statKey:'', lastRead:0
+};
+let W4 = 0, H4 = 0;
+
+function homeC4(id) { return { x:HOME4[id].fx * W4, y:HOME4[id].fy * H4 }; }
+function zoneC4() {
+  return { x:zone4.offsetLeft + zone4.offsetWidth / 2, y:zone4.offsetTop + zone4.offsetHeight / 2, r:zone4.offsetWidth / 2 };
+}
+function placeBtn4(id, x, y, instant) {
+  const el = BTN4[id];
+  if (instant) el.style.transition = 'none';
+  el.style.left = (x - R4) + 'px'; el.style.top = (y - R4) + 'px';
+  if (instant) { void el.offsetWidth; el.style.transition = ''; }
+}
+function resize4() {
+  const w = stage4.clientWidth, h = stage4.clientHeight;
+  if (!w || !h) return;
+  W4 = w; H4 = h;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv4.width = w * dpr; cv4.height = h * dpr; ctx4.setTransform(dpr, 0, 0, dpr, 0, 0);
+  SEQ4.forEach(id => { const c = homeC4(id); placeBtn4(id, c.x, c.y, true); });
+  const B = G4.ball;
+  if (!G4.inited) { G4.inited = true; activate4(); }
+  else if (G4.settled) { const z = zoneC4(); B.x = z.x; B.y = z.y; }
+  else { B.x = clamp4(B.x, R4, W4 - R4); B.y = clamp4(B.y, R4, H4 - R4); }
+}
+window.addEventListener('resize', () => { if (activeSim === 4) resize4(); });
+
+function setStat4(key, text) { if (G4.statKey !== key) { G4.statKey = key; stat4.textContent = text; } }
+let flashT4 = 0;
+function flash4(msg) { G4.statKey = 'flash'; stat4.textContent = msg; clearTimeout(flashT4); flashT4 = setTimeout(() => { G4.statKey = ''; }, 2600); }
+
+// 차례가 된 버튼 → 금속 구슬로 변신 (제자리에서 톡 튀어나오듯)
+function activate4() {
+  const id = SEQ4[G4.step], B = G4.ball, c = homeC4(id);
+  B.x = c.x; B.y = c.y; B.vx = B.vy = 0;
+  B.scale = .72; B.scaleVel = 0; B.scaleTarget = 1;
+  G4.settled = false; G4.inZone = false; zone4.classList.remove('lit');
+  BTN4[id].classList.add('as-ball');
+  vibe(6);
+}
+// 실행 후 → 구슬은 다시 버튼이 되어 원래 자리로 돌아가고, 다음 버튼이 구슬이 됨
+function finishStep4() {
+  const id = SEQ4[G4.step], B = G4.ball, el = BTN4[id];
+  placeBtn4(id, B.x, B.y, true);
+  el.classList.remove('as-ball');
+  requestAnimationFrame(() => { const c = homeC4(id); placeBtn4(id, c.x, c.y, false); });
+  G4.step = (G4.step + 1) % SEQ4.length;
+  if (gotOri) G4.armed = false;            // 기울인 채로면 다음 구슬이 바로 굴러가지 않게
+  else slider4.value = 0;
+  activate4();
+}
+function run4(id) {
+  ensureCtx4();
+  if (id === 'play') { if (mus4.playing) pause4(); else play4(); }
+  else if (id === 'next') step4(1);
+}
+
+/* ── 입력 : 버튼(평소 상태) ── */
+['play', 'next'].forEach(id => BTN4[id].addEventListener('pointerdown', e => { e.preventDefault(); run4(id); vibe(8); }));
+BTN4.volume.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  knobStart4(e, () => { const r = BTN4.volume.getBoundingClientRect(); return { x:r.left + r.width / 2, y:r.top + r.height / 2 }; });
+});
+
+/* ── 입력 : 금속 구슬 (캔버스 위, 캡처 단계에서 먼저 판정) ── */
+stage4.addEventListener('pointerdown', e => {
+  const B = G4.ball; if (!G4.inited) return;
+  const r = stage4.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+  if (Math.hypot(mx - B.x, my - B.y) > R4 * B.scale * 1.25) return;
+  e.preventDefault(); e.stopPropagation();
+  const id = SEQ4[G4.step];
+  if (id === 'volume') {
+    knobStart4(e, () => { const rr = stage4.getBoundingClientRect(); return { x:rr.left + B.x, y:rr.top + B.y }; });
+    B.scaleTarget = 1.08;
+    return;
+  }
+  G4.pressing = true; B.scaleTarget = 1.3;
+  vibe([14, 20, 8]);                         // 시뮬레이터-2와 같은 딱-딱 쇳소리 진동
+  run4(id);                                  // 누르는 순간 바로 실행 → 음악이 즉시 나옴
+}, true);
+window.addEventListener('pointerup', () => {
+  const B = G4.ball;
+  B.scaleTarget = 1;
+  if (G4.pressing) { G4.pressing = false; setTimeout(finishStep4, 140); }
+});
+window.addEventListener('pointercancel', () => { G4.pressing = false; G4.ball.scaleTarget = 1; });
+
+slider4.addEventListener('input', () => { if (!gotOri) G4.armed = true; });
+q4('calib4').addEventListener('click', () => { G4.base = null; G4.armed = true; flash4('지금 들고 있는 자세를 수평(0°)으로 잡았어요'); });
+
+/* ── 기울기 : 화면 평면 위 중력 방향 (beta·gamma를 합쳐 계산 → 세워 들어도 안정) ── */
+function tilt4() {
+  if (gotOri) {
+    const b = oriBeta * DEG, g = oriGamma * DEG;
+    const x = Math.cos(b) * Math.sin(g), y = Math.sin(b);
+    if (!G4.base) G4.base = { x, y };        // 처음 값(또는 재설정 순간)의 자세를 0°로
+    return { x:x - G4.base.x, y:y - G4.base.y, live:true };
+  }
+  return { x:Math.sin(+slider4.value * DEG), y:0, live:false };
+}
+
+/* ── 메인 업데이트 ── */
+function updateSim4(t, dt) {
+  if (!G4.inited) { resize4(); if (!G4.inited) return; }
+  const B = G4.ball, id = SEQ4[G4.step], LB = LB4[id], n = G4.step + 1;
+  const tv = tilt4();
+  G4.ax += (tv.x - G4.ax) * 0.15;
+  G4.ay += (tv.y - G4.ay) * 0.15;
+  const degX = Math.asin(clamp4(G4.ax, -1, 1)) / DEG, degY = Math.asin(clamp4(G4.ay, -1, 1)) / DEG;
+  if (tv.live) slider4.value = Math.round(clamp4(degX, -20, 20));
+
+  if (t - G4.lastRead > 200) {
+    G4.lastRead = t;
+    readout4.innerHTML = tv.live
+      ? `센서 수신 중 · 좌우 <b>${degX >= 0 ? '+' : ''}${degX.toFixed(1)}°</b> · 앞뒤 <b>${degY >= 0 ? '+' : ''}${degY.toFixed(1)}°</b>`
+      : (started ? '센서 값 없음 · 하단 안내를 확인하세요. 지금은 슬라이더로 동작해요'
+                 : '센서 대기 · 위의 시작 버튼을 누르거나 슬라이더로 기울기를 흉내 내세요');
+  }
+
+  if (!G4.armed) {
+    if (Math.hypot(G4.ax, G4.ay) < Math.sin(TRIG4 * DEG)) G4.armed = true;
+    else if (G4.statKey !== 'flash') setStat4('rearm' + n, `${n}단계 · 폰을 수평으로 되돌리면 ${LB} 구슬이 준비돼요`);
+  } else if (!G4.settled) {
+    /* 가상 바닥 : 오른쪽으로 기울이면 오른쪽 아래(엄지) 방향으로 휘어지는 홈을 따라 흐름 */
+    const gA = 0.42;
+    let fx = G4.ax * gA;
+    let fy = (G4.ay + 0.8 * Math.max(0, G4.ax)) * gA;
+    const spd0 = Math.hypot(B.vx, B.vy);
+    if (spd0 < 0.05 && Math.hypot(fx, fy) < Math.sin(TRIG4 * DEG) * gA && !G4.inZone) { fx = fy = 0; B.vx *= .5; B.vy *= .5; }
+    B.vx += fx * dt; B.vy += fy * dt;
+    B.vx *= Math.pow(0.988, dt); B.vy *= Math.pow(0.988, dt);
+
+    /* Thumb Zone = 오목한 접시 : 들어오면 중심으로 끌리며 빠르게 감쇠 → 제자리에 쏙 안착 */
+    const z = zoneC4(), zx = z.x - B.x, zy = z.y - B.y, zd = Math.hypot(zx, zy);
+    if (zd < z.r) {
+      if (!G4.inZone) { G4.inZone = true; vibe(10); }
+      B.vx += zx * 0.006 * dt; B.vy += zy * 0.006 * dt;
+      B.vx *= Math.pow(0.93, dt); B.vy *= Math.pow(0.93, dt);
+    } else G4.inZone = false;
+
+    B.x += B.vx * dt; B.y += B.vy * dt;
+
+    let hit = 0;
+    if (B.x < R4)      { B.x = R4;      hit = Math.abs(B.vx); B.vx = -B.vx * 0.62; }
+    if (B.x > W4 - R4) { B.x = W4 - R4; hit = Math.abs(B.vx); B.vx = -B.vx * 0.62; }
+    if (B.y < R4)      { B.y = R4;      hit = Math.max(hit, Math.abs(B.vy)); B.vy = -B.vy * 0.62; }
+    if (B.y > H4 - R4) { B.y = H4 - R4; hit = Math.max(hit, Math.abs(B.vy)); B.vy = -B.vy * 0.62; }
+    if (hit > 0.6) vibe(Math.min(35, 8 + hit * 2) | 0);
+
+    const spd = Math.hypot(B.vx, B.vy);
+    B.rollAngle += spd * dt / R4;
+    if (spd > 0.35) {                         // 시뮬레이터-2와 같은 굴러가는 톡톡 진동
+      G4.rollTick -= dt * (0.6 + spd * 0.35);
+      if (G4.rollTick <= 0) { vibe(Math.min(12, 3 + spd * 0.7) | 0); G4.rollTick = 3.5 + Math.random() * 1.5; }
+    } else G4.rollTick = 0;
+
+    const zd2 = Math.hypot(z.x - B.x, z.y - B.y);
+    if (G4.inZone && zd2 < z.r * 0.4 && spd < 0.45) {   // 접시 바닥 근처에서 거의 멈추면 중심으로 쏙
+      /* 안착 : 중심에 맞추고, 살짝 가라앉았다 튀어 오르는 스프링 + 묵직한 진동 */
+      G4.settled = true; B.x = z.x; B.y = z.y; B.vx = B.vy = 0;
+      B.scaleVel -= 0.07; vibe([12, 30, 6]);
+      zone4.classList.add('lit');
+    }
+    if (G4.statKey !== 'flash') {
+      if (spd > 0.3) setStat4('roll' + n, `${n}단계 · ${LB} 구슬이 굴러가는 중`);
+      else if (!G4.inZone) setStat4('idle' + n, `${n}단계 · ${LB} 차례 · 오른쪽으로 기울여 엄지 쪽으로 굴려 보세요`);
+    }
+  } else {
+    const z = zoneC4(); B.x = z.x; B.y = z.y;
+    if (G4.statKey !== 'flash') setStat4('set' + n, id === 'volume'
+      ? `${n}단계 · VOLUME 안착 · 구슬을 돌려 볼륨을 조절하세요`
+      : `${n}단계 · ${LB} 안착 · 구슬을 눌러 실행하세요`);
+  }
+
+  updateScaleSpring(B);
+  draw4(t);
+}
+
+function draw4(t) {
+  const B = G4.ball, W = W4, H = H4, R = R4 * B.scale, id = SEQ4[G4.step];
+  ctx4.clearRect(0, 0, W, H);
+
+  /* 시뮬레이터-2와 같은 탑뷰 그림자 + 접촉 음영 */
+  const speed = Math.hypot(B.vx, B.vy);
+  let dx = W / 2 - B.x, dy = -H * 0.25 - B.y;
+  const d = Math.hypot(dx, dy) || 1; dx /= d; dy /= d;
+  const so = R * (0.45 + d / (H * 2.2));
+  const shx = B.x - dx * so - B.vx * 1.2, shy = B.y - dy * so - B.vy * 1.2;
+  const sh = ctx4.createRadialGradient(shx, shy, R * 0.15, shx, shy, R * 1.3);
+  sh.addColorStop(0, 'rgba(0,0,0,0.5)'); sh.addColorStop(0.6, 'rgba(0,0,0,0.22)'); sh.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx4.beginPath();
+  ctx4.ellipse(shx, shy, R * 1.18 * (1 + Math.min(0.4, speed * 0.035)), R * 1.06, Math.atan2(-dy, -dx), 0, Math.PI * 2);
+  ctx4.fillStyle = sh; ctx4.fill();
+  const ao = ctx4.createRadialGradient(B.x, B.y, R * 0.85, B.x, B.y, R * (G4.settled ? 1.3 : 1.18));
+  ao.addColorStop(0, `rgba(0,0,0,${G4.settled ? 0.42 : 0.30})`); ao.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx4.beginPath(); ctx4.arc(B.x, B.y, R * 1.3, 0, Math.PI * 2); ctx4.fillStyle = ao; ctx4.fill();
+
+  drawChromeBall(ctx4, B, R, W, H, t, 'floor');
+
+  /* 구슬 표면에 새긴 라벨 (각인 느낌) */
+  ctx4.save();
+  ctx4.textAlign = 'center'; ctx4.textBaseline = 'middle';
+  if (id === 'volume') {
+    const deg = mus4.vol / 100 * 270, a0 = -Math.PI / 2 - 135 * DEG, a1 = a0 + deg * DEG;
+    // 바깥 볼륨 링
+    ctx4.lineCap = 'round'; ctx4.lineWidth = 4;
+    ctx4.strokeStyle = 'rgba(255,255,255,.12)';
+    ctx4.beginPath(); ctx4.arc(B.x, B.y, R + 9, a0, a0 + 270 * DEG); ctx4.stroke();
+    ctx4.strokeStyle = '#7dd3fc';
+    ctx4.beginPath(); ctx4.arc(B.x, B.y, R + 9, a0, Math.max(a0 + 0.001, a1)); ctx4.stroke();
+    // 널링(돌기) 눈금이 다이얼 각도에 따라 함께 회전
+    for (let k = 0; k < 28; k++) {
+      const a = a1 + k / 28 * Math.PI * 2;
+      ctx4.strokeStyle = 'rgba(20,26,32,.35)'; ctx4.lineWidth = 1.2;
+      ctx4.beginPath();
+      ctx4.moveTo(B.x + Math.cos(a) * R * 0.8, B.y + Math.sin(a) * R * 0.8);
+      ctx4.lineTo(B.x + Math.cos(a) * R * 0.93, B.y + Math.sin(a) * R * 0.93);
+      ctx4.stroke();
+    }
+    ctx4.fillStyle = '#7dd3fc'; ctx4.shadowColor = 'rgba(125,211,252,.9)'; ctx4.shadowBlur = 6;
+    ctx4.beginPath(); ctx4.arc(B.x + Math.cos(a1) * R * 0.66, B.y + Math.sin(a1) * R * 0.66, 3.2, 0, Math.PI * 2); ctx4.fill();
+    ctx4.shadowBlur = 0;
+    engrave4(String(Math.round(mus4.vol)), B.x, B.y + 1, '800 17px system-ui, sans-serif');
+    engrave4('VOL', B.x, B.y - 15 * B.scale, '700 10px system-ui, sans-serif');
+  } else {
+    engrave4(id === 'play' ? (mus4.playing ? 'PAUSE' : 'PLAY') : 'NEXT', B.x, B.y, '800 14px system-ui, sans-serif');
+  }
+  ctx4.restore();
+}
+function engrave4(txt, x, y, font) {
+  ctx4.font = font;
+  ctx4.fillStyle = 'rgba(255,255,255,.55)'; ctx4.fillText(txt, x, y + 1);
+  ctx4.fillStyle = 'rgba(22,28,36,.82)'; ctx4.fillText(txt, x, y);
+}
+
+renderKnob4(); render4Music();
+setTimeout(warm4, 800);
+
 </script>
 </body>
 </html>
