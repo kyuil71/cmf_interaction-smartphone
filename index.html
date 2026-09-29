@@ -125,7 +125,7 @@
     }
     #canvas4 { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
     .p4-zone {
-        position: absolute; right: 18px; bottom: 24px; width: 132px; height: 132px; z-index: 1;
+        position: absolute; right: 49px; bottom: 53px; width: 132px; height: 132px; z-index: 1;   /* 파란 원은 원래 크기, 중심은 v8과 동일 */
         border: 1.5px dashed rgba(125,211,252,.45); border-radius: 50%;
         display: flex; align-items: center; justify-content: center; text-align: center;
         color: #8cc9e8; font-size: 12px; pointer-events: none;
@@ -133,7 +133,7 @@
     }
     /* 끌어당김 범위 표시 (존 반지름 × 1.5) */
     .p4-zone::before {
-        content: ""; position: absolute; inset: -33px; border-radius: 50%;
+        content: ""; position: absolute; inset: -62.5%; border-radius: 50%;   /* 끌어당김 범위 반지름 ≈148px 유지 */
         border: 1px dashed rgba(125,211,252,.18);
         background: radial-gradient(circle, rgba(125,211,252,.05) 60%, rgba(125,211,252,0) 72%);
     }
@@ -167,7 +167,8 @@
     }
     .knob-lb { display: flex; flex-direction: column; align-items: center; line-height: 1.1; font-size: 11px; color: #9aa3b2; pointer-events: none; }
     .knob-lb b { font-size: 17px; color: #fff; font-variant-numeric: tabular-nums; }
-    .p4-stat {
+    .p4-stat { display: none !important; }
+    .p4-stat-unused {
         position: absolute; left: 16px; right: 16px; top: 14px; z-index: 4; pointer-events: none;
         font-size: 14px; color: #d6dbe6; line-height: 1.45;
     }
@@ -1245,10 +1246,10 @@ const stage4 = q4('stage4'), cv4 = q4('canvas4'), ctx4 = cv4.getContext('2d'), z
 const slider4 = q4('tilt4'), readout4 = q4('readout4'), stat4 = q4('stat4');
 const SEQ4 = ['play', 'volume', 'next'];
 const LB4 = { play:'PLAY', volume:'VOLUME', next:'NEXT' };
-const HOME4 = { play:{ fx:.22, fy:.24 }, volume:{ fx:.56, fy:.43 }, next:{ fx:.26, fy:.66 } };
+const HOME4 = { play:{ fx:.22, fy:.2 }, volume:{ fx:.5, fy:.3 }, next:{ fx:.18, fy:.55 } };   // 커진 엄지 존과 겹치지 않게 배치
 const BTN4 = {}; SEQ4.forEach(id => { BTN4[id] = q4('b4-' + id); });
 const R4 = 42;
-const CAPTURE4 = 1.5;      // 엄지 존이 구슬을 끌어당기는 범위 = 존 반지름 × 1.5 (기존 대비 +50%)
+const CAPTURE4 = 2.25;     // 끌어당김 범위 = 파란 원 반지름(66px) × 2.25 ≈ 148px (v8의 넓힌 범위 유지)
 const TRIG4 = 3;          // 이 각도 미만의 기울기로는 구슬이 출발하지 않음 (정지 마찰)
 const G4 = {
   step:0, ball:makeBallState(), inited:false,
