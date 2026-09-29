@@ -173,6 +173,16 @@
         font-size: 14px; color: #d6dbe6; line-height: 1.45;
     }
     .p4-ctrl { padding: 10px 16px 0; }
+    /* 우측 상단 수동/자동 토글 : 켜짐 = 기울여서 굴리기, 꺼짐 = 구슬이 스스로 엄지 존으로 */
+    .p4-manual {
+        position: absolute; top: 12px; right: 12px; z-index: 5;
+        height: 34px; padding: 0 14px; border-radius: 17px; font: inherit; font-size: 13px; font-weight: 700;
+        border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color: #8b93a3; cursor: pointer;
+        display: flex; align-items: center; gap: 7px; transition: background .2s, color .2s, border-color .2s;
+    }
+    .p4-manual::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #4b5263; transition: background .2s, box-shadow .2s; }
+    .p4-manual.on { background: rgba(125,211,252,.16); border-color: rgba(125,211,252,.55); color: #d8f1ff; }
+    .p4-manual.on::before { background: #7dd3fc; box-shadow: 0 0 8px rgba(125,211,252,.9); }
     .p4-row { display: flex; align-items: center; gap: 10px; }
     .p4-row label { font-size: 13px; color: #9aa3b2; white-space: nowrap; }
     .p4-row input[type=range] { flex: 1; min-width: 0; }
@@ -301,6 +311,7 @@
     </div>
     <section class="p4-stage" id="stage4">
       <div class="p4-zone" id="zone4">THUMB<br>ZONE</div>
+      <button class="p4-manual" id="manual4" aria-pressed="false">수동</button>
       <button class="b4" id="b4-play">PLAY</button>
       <button class="b4 knob" id="b4-volume" aria-label="볼륨 (돌려서 조절)">
         <span class="knob-ring" id="b4Ring"></span><span class="knob-dot"></span>
@@ -1436,7 +1447,8 @@ const TRIG4 = 3;          // 이 각도 미만의 기울기로는 구슬이 출�
 const G4 = {
   step:0, ball:makeBallState(), inited:false,
   armed:true, settled:false, inZone:false, pressing:false,
-  ax:0, ay:0, base:null, rollTick:0, statKey:'', lastRead:0
+  ax:0, ay:0, base:null, rollTick:0, statKey:'', lastRead:0,
+  manual:false, actT:0          // manual : 수동 버튼 켜짐(기울기로 굴림) / 꺼짐(자동으로 엄지 존까지)
 };
 let W4 = 0, H4 = 0;
 
@@ -1473,7 +1485,7 @@ function activate4(startInZone) {
   const id = SEQ4[G4.step], B = G4.ball, c = startInZone ? zoneC4() : homeC4(id);
   B.x = c.x; B.y = c.y; B.vx = B.vy = 0;
   B.scale = .72; B.scaleVel = 0; B.scaleTarget = 1;
-  G4.settled = !!startInZone; G4.inZone = !!startInZone;
+  G4.settled = !!startInZone; G4.inZone = !!startInZone; G4.actT = performance.now();
   zone4.classList.toggle('lit', !!startInZone);
   BTN4[id].classList.add('as-ball');
   vibe(6);
@@ -1529,6 +1541,15 @@ window.addEventListener('pointerup', () => {
 window.addEventListener('pointercancel', () => { G4.pressing = false; G4.ball.scaleTarget = 1; });
 
 slider4.addEventListener('input', () => { if (!gotOri) G4.armed = true; });
+const manual4 = q4('manual4');
+manual4.addEventListener('pointerdown', e => e.stopPropagation());
+manual4.addEventListener('click', () => {
+  G4.manual = !G4.manual;
+  manual4.classList.toggle('on', G4.manual);
+  manual4.setAttribute('aria-pressed', G4.manual);
+  G4.armed = true; G4.actT = performance.now() - 300;   // 자동으로 바꾸면 곧바로 출발
+  vibe(8);
+});
 q4('shake4').addEventListener('click', () => { shake4.last = 0; onShake4(); });
 q4('calib4').addEventListener('click', () => { G4.base = null; G4.armed = true; flash4('지금 들고 있는 자세를 수평(0°)으로 잡았어요'); });
 
@@ -1561,16 +1582,30 @@ function updateSim4(t, dt) {
                  : '센서 대기 · 위의 시작 버튼을 누르거나 슬라이더로 기울기를 흉내 내세요');
   }
 
-  if (!G4.armed) {
+  if (!G4.armed && G4.manual) {
     if (Math.hypot(G4.ax, G4.ay) < Math.sin(TRIG4 * DEG)) G4.armed = true;
     else if (G4.statKey !== 'flash') setStat4('rearm' + n, `${n}단계 · 폰을 수평으로 되돌리면 ${LB} 구슬이 준비돼요`);
   } else if (!G4.settled) {
     /* 가상 바닥 : 오른쪽으로 기울이면 오른쪽 아래(엄지) 방향으로 휘어지는 홈을 따라 흐름 */
     const gA = 0.42;
-    let fx = G4.ax * gA;
-    let fy = (G4.ay + 0.8 * Math.max(0, G4.ax)) * gA;
-    const spd0 = Math.hypot(B.vx, B.vy);
-    if (spd0 < 0.05 && Math.hypot(fx, fy) < Math.sin(TRIG4 * DEG) * gA && !G4.inZone) { fx = fy = 0; B.vx *= .5; B.vy *= .5; }
+    let fx, fy;
+    if (G4.manual) {
+      fx = G4.ax * gA;
+      fy = (G4.ay + 0.8 * Math.max(0, G4.ax)) * gA;
+      const spd0 = Math.hypot(B.vx, B.vy);
+      if (spd0 < 0.05 && Math.hypot(fx, fy) < Math.sin(TRIG4 * DEG) * gA && !G4.inZone) { fx = fy = 0; B.vx *= .5; B.vy *= .5; }
+    } else {
+      /* 자동 : 구슬이 된 뒤 잠깐 멈췄다가, 스스로 엄지 존 쪽으로 기울어진 바닥을 따라 굴러감
+         (수동과 같은 물리 · 가까워지면 경사가 완만해져 접시에 부드럽게 들어감) */
+      const zc = zoneC4(), ex = zc.x - B.x, ey = zc.y - B.y, ed = Math.hypot(ex, ey) || 1;
+      const wait = performance.now() - G4.actT < 450;
+      const a = wait ? 0 : 0.11 * Math.min(1, ed / 140 + 0.25);
+      fx = ex / ed * a; fy = ey / ed * a;
+      // 목표 방향과 어긋난 속도 성분은 빨리 줄여 곧게 굴러가게
+      const along = (B.vx * ex + B.vy * ey) / ed;
+      const px = B.vx - along * ex / ed, py = B.vy - along * ey / ed;
+      B.vx -= px * 0.08 * dt; B.vy -= py * 0.08 * dt;
+    }
     B.vx += fx * dt; B.vy += fy * dt;
     B.vx *= Math.pow(0.988, dt); B.vy *= Math.pow(0.988, dt);
 
