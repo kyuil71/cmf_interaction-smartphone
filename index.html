@@ -94,7 +94,7 @@
     /* 시뮬레이터-3 : 하얀 천 캔버스 */
     #panel3 { background: #efede8; }
     #cloth-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .tab { white-space: nowrap; letter-spacing: -0.3px; }
+    .tab { white-space: nowrap; letter-spacing: -0.5px; font-size: min(14px, 3.3vw); padding: 14px 2px; }
 
     /* 시뮬레이터-4 : Adaptive Gravity Music (자이로 뮤직 인터랙션) */
     #panel4 { background: #0b0d12; }
@@ -182,6 +182,83 @@
     }
     .p4-readout { margin-top: 8px; font-size: 13px; color: #9aa3b2; line-height: 1.45; font-variant-numeric: tabular-nums; }
     .p4-readout b { color: #7dd3fc; }
+
+    /* 시뮬레이터-5 : 기울기 한 손 자판 (삼성 키보드 스타일) */
+    #panel5 { background: #000; }
+    .p5-wrap {
+        position: absolute; inset: 0; display: flex; flex-direction: column; text-align: left;
+        padding: 50px 0 calc(40px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box;
+        max-width: 430px; margin: 0 auto;
+    }
+    .p5-ctrl { padding: 8px 14px 6px; }
+    .p5-ctrl .p4-row button.on { background: #3e91ff; }
+    .p5-mode { flex: none; font-size: 13px; font-weight: 700; color: #cfe3ff; min-width: 52px; text-align: right; }
+    .p5-chat {
+        flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 0 10px;
+        border-radius: 24px; background: #101012; border: 1px solid rgba(255,255,255,.06); overflow: hidden;
+    }
+    .p5-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.06); }
+    .p5-ava { width: 34px; height: 34px; border-radius: 50%; background: #5b6cff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex: none; }
+    .p5-name { font-size: 16px; font-weight: 700; }
+    .p5-sub { font-size: 12px; color: #8e8e93; }
+    .p5-msgs { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 12px 6px; touch-action: pan-y; display: flex; flex-direction: column; gap: 6px; }
+    .p5-b { max-width: 78%; padding: 9px 13px; border-radius: 20px; font-size: 16px; line-height: 1.4; white-space: pre-wrap; word-break: break-all; }
+    .p5-b.in  { align-self: flex-start; background: #2c2c2e; border-bottom-left-radius: 6px; }
+    .p5-b.out { align-self: flex-end; background: #3e7cf6; border-bottom-right-radius: 6px; }
+    .p5-t { font-size: 11px; color: #8e8e93; align-self: flex-end; margin: -2px 4px 2px; }
+    .p5-comp { display: flex; align-items: flex-end; gap: 8px; padding: 8px 10px 10px; }
+    .p5-field {
+        flex: 1; min-height: 40px; max-height: 96px; overflow-y: auto; box-sizing: border-box;
+        padding: 9px 14px; border-radius: 20px; background: #1f1f22; border: 1.5px solid #3e91ff;
+        font-size: 16px; line-height: 1.35; white-space: pre-wrap; word-break: break-all; color: #fff;
+    }
+    .p5-field .ph { color: #6c6c70; }
+    .p5-field u { text-decoration: none; background: rgba(62,145,255,.28); border-bottom: 2px solid #3e91ff; }
+    .p5-caret { display: inline-block; width: 2px; height: 1.15em; margin-left: 1px; vertical-align: -3px; background: #3e91ff; animation: p5blink 1s steps(1) infinite; }
+    @keyframes p5blink { 50% { opacity: 0; } }
+    .p5-send {
+        flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; padding: 0;
+        background: #3e7cf6; color: #fff; font-size: 18px; font-weight: 700; cursor: pointer;
+    }
+    .p5-send:disabled { background: #2c2c2e; color: #636366; }
+    .p5-len { font-size: 11px; color: #8e8e93; text-align: right; padding: 0 16px 2px; min-height: 14px; }
+
+    /* 자판 본체 */
+    .kb5 { position: relative; margin-top: 8px; background: #121214; padding: 6px 0 4px; user-select: none; -webkit-user-select: none; }
+    .kb5-tool { display: flex; justify-content: space-around; align-items: center; height: 34px; color: #b8b8be; font-size: 16px; }
+    .kb5-tool span { opacity: .85; }
+    .kb5-board { position: relative; touch-action: none; }
+    .k5-row { display: flex; gap: 5px; margin: 0 4px 8px; }
+    .k5-row:last-child { margin-bottom: 2px; }
+    .k5 {
+        position: relative; flex: 1 1 0; min-width: 0; height: 46px; border-radius: 9px;
+        background: #3a3a3d; color: #f2f2f7; display: flex; align-items: center; justify-content: center;
+        font-size: 20px; font-weight: 400; box-shadow: 0 1px 0 rgba(0,0,0,.6);
+        cursor: pointer; transition: background .06s;
+    }
+    .k5.fn { background: #28282b; font-size: 15px; font-weight: 600; color: #d1d1d6; }
+    .k5.sp { flex-grow: 4; font-size: 14px; color: #8e8e93; }
+    .k5.w13 { flex-grow: 1.3; } .k5.w15 { flex-grow: 1.5; } .k5.w11 { flex-grow: 1.1; }
+    .k5.gap { flex-grow: .5; visibility: hidden; }
+    .k5.down { background: #5a5a5f; }
+    .k5.fn.down { background: #48484c; }
+    .k5.lit { color: #3e91ff; }
+    .k5.lock { color: #3e91ff; box-shadow: inset 0 -3px 0 #3e91ff; }
+    .k5 sup { position: absolute; top: 3px; right: 5px; font-size: 10px; color: #8e8e93; }
+    .k5-pop {
+        position: absolute; z-index: 10; pointer-events: none; display: none;
+        min-width: 44px; height: 56px; padding: 0 6px; box-sizing: border-box; border-radius: 12px;
+        background: #5a5a5f; color: #fff; font-size: 28px; align-items: center; justify-content: center;
+        box-shadow: 0 6px 18px rgba(0,0,0,.5);
+    }
+    .kb5-side {
+        position: absolute; top: 40px; bottom: 4px; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; gap: 14px; opacity: 0; pointer-events: none;
+    }
+    .kb5-side button {
+        width: 44px; height: 44px; border-radius: 50%; border: 0; padding: 0;
+        background: #28282b; color: #e5e5ea; font-size: 18px; cursor: pointer;
+    }
 </style>
 </head>
 <body>
@@ -191,6 +268,7 @@
     <button class="tab" data-sim="2">시뮬레이터-2</button>
     <button class="tab" data-sim="3">시뮬레이터-3</button>
     <button class="tab" data-sim="4">시뮬레이터-4</button>
+    <button class="tab" data-sim="5">시뮬레이터-5</button>
 </div>
 
 <button id="btn-start">프로그램 시작하기 (권한 허용)</button>
@@ -245,6 +323,44 @@
   </div>
 </div>
 
+<div class="panel" id="panel5">
+  <div class="p5-wrap">
+    <section class="p5-ctrl">
+      <div class="p4-row">
+        <label for="tilt5">기울기</label>
+        <input id="tilt5" type="range" min="-25" max="25" value="0" step="1">
+        <button id="calib5">기준 재설정</button>
+        <span class="p5-mode" id="mode5">가운데</span>
+      </div>
+      <div class="p4-readout" id="readout5">센서 대기 · 슬라이더로 기울기를 흉내 낼 수 있어요</div>
+    </section>
+    <section class="p5-chat">
+      <div class="p5-head">
+        <div class="p5-ava">랩</div>
+        <div><div class="p5-name">디자인 리서치 랩</div><div class="p5-sub">자판 테스트</div></div>
+      </div>
+      <div class="p5-msgs" id="msgs5">
+        <div class="p5-b in">폰을 오른쪽으로 기울이면 자판이 오른손 엄지 쪽으로 모여요.</div>
+        <div class="p5-b in">왼쪽으로 기울이면 왼손 쪽으로. 흔들면 다시 가운데로 펼쳐져요.</div>
+      </div>
+      <div class="p5-comp">
+        <div class="p5-field" id="field5"></div>
+        <button class="p5-send" id="send5" aria-label="보내기" disabled>↑</button>
+      </div>
+      <div class="p5-len" id="len5"></div>
+    </section>
+    <section class="kb5" id="kb5">
+      <div class="kb5-tool"><span>☺</span><span>🎤</span><span>⚙</span><span>▢</span><span>…</span></div>
+      <div class="kb5-board" id="board5"></div>
+      <div class="kb5-side" id="side5">
+        <button id="swap5" aria-label="반대쪽으로 옮기기">⇆</button>
+        <button id="full5" aria-label="자판 전체 크기로">⤢</button>
+      </div>
+      <div class="k5-pop" id="pop5"></div>
+    </section>
+  </div>
+</div>
+
 <script>
 /* ═════════════════════════════════════════════
    공통 상태
@@ -292,6 +408,7 @@ document.querySelectorAll('.tab').forEach(tab => {
         document.getElementById('panel' + activeSim).classList.add('active');
         statusDiv.classList.toggle('on-light', activeSim === 3);
         if (activeSim === 4) { requestAnimationFrame(resize4); warm4(); }
+        if (activeSim === 5) requestAnimationFrame(resize5);
         else if (mus4.playing) pause4();
     });
 });
@@ -550,6 +667,7 @@ function loop(t) {
     if (activeSim === 2)            updateSim2(t, dt);
     if (activeSim === 3)            updateSim3(t, dt);
     if (activeSim === 4)            updateSim4(t, dt);
+    if (activeSim === 5)            updateSim5(t, dt);
 
     requestAnimationFrame(loop);
 }
@@ -1234,6 +1352,7 @@ function enableShake4() {
   window.addEventListener('deviceorientation', onOriShake4);
 }
 function onShake4() {
+  if (activeSim === 5) { vibe([30, 40, 30]); onShake5(); return; }
   if (activeSim !== 4 || !G4.inited) return;
   knob4.on = false; G4.pressing = false;
   vibe([30, 40, 30]);
@@ -1517,6 +1636,269 @@ function engrave4(txt, x, y, font) {
 
 renderKnob4(); renderNextKnob4(); render4Music();
 setTimeout(warm4, 800);
+
+/* ═════════════════════════════════════════════
+   시뮬레이터-5 : 기울기 한 손 자판 (삼성 키보드 스타일)
+   · 시뮬레이터-4와 같은 방식으로 화면 평면 위 중력 방향을 계산
+   · 오른쪽으로 기울이면 오른손 자판, 왼쪽이면 왼손 자판 (수평으로 되돌려야 다음 기울기를 받음)
+   · 기울이는 도중에는 그쪽으로 살짝 끌려가다가, 문턱을 넘으면 스프링처럼 '착' 붙음
+   · 흔들거나 ⤢ 버튼을 누르면 다시 가운데 전체 자판
+═════════════════════════════════════════════ */
+const q5 = id => document.getElementById(id);
+const kb5 = q5('kb5'), board5 = q5('board5'), side5 = q5('side5'), pop5 = q5('pop5');
+const field5 = q5('field5'), send5 = q5('send5'), msgs5 = q5('msgs5'), len5 = q5('len5');
+const slider5 = q5('tilt5'), readout5 = q5('readout5'), modeLb5 = q5('mode5');
+
+const ENTER5 = 12;      // 이 각도를 넘으면 한 손 자판으로 전환
+const EXIT5  = 5;       // 이 각도 안으로 돌아오면 다음 기울기를 받을 준비
+const ONE5   = 0.74;    // 한 손 모드 자판 폭 (전체 대비)
+const G5 = { mode:0, armed:true, s:0, sv:0, target:0, ax:0, base:null, K:0, lastRead:0, applied:'' };
+const MODE_LB5 = { '-1':'왼손', '0':'가운데', '1':'오른손' };
+
+/* ── 한글 오토마타 (두벌식) ── */
+const CHO5  = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+const JUNG5 = 'ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ';
+const JONG5 = ['', 'ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const VC5 = { 'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ' };
+const CC5 = { 'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ','ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ' };
+const SPLIT5 = {}; Object.keys(CC5).forEach(k => { SPLIT5[CC5[k]] = [k[0], k[1]]; });
+
+const T5 = { text:'', cur:{}, stack:[{}] };
+function syl5(c) {
+  if (c.cho && c.jung) return String.fromCharCode(0xAC00 + (CHO5.indexOf(c.cho) * 21 + JUNG5.indexOf(c.jung)) * 28 + JONG5.indexOf(c.jong || ''));
+  return c.cho || c.jung || '';
+}
+function commit5() { T5.text += syl5(T5.cur); T5.cur = {}; T5.stack = [{}]; }
+function jamo5(j) {
+  const c = T5.cur, isV = JUNG5.includes(j);
+  let n, flushed = false;
+  const flush = (keep) => { T5.text += syl5(keep || c); flushed = true; };
+  if (!isV) {
+    if (c.cho && c.jung && !c.jong && JONG5.includes(j)) n = { ...c, jong:j };
+    else if (c.jong && CC5[c.jong + j])               n = { ...c, jong:CC5[c.jong + j] };
+    else { flush(); n = { cho:j }; }
+  } else {
+    if (c.cho && !c.jung)                             n = { ...c, jung:j };
+    else if (c.jung && !c.jong && VC5[c.jung + j])    n = { ...c, jung:VC5[c.jung + j] };
+    else if (c.jong) {                                 // 받침이 다음 글자의 초성으로 넘어감 (각+ㅏ → 가가, 닭+ㅏ → 달가)
+      const sp = SPLIT5[c.jong] || [null, c.jong];
+      flush({ cho:c.cho, jung:c.jung, jong:sp[0] }); n = { cho:sp[1], jung:j };
+    } else { flush(); n = { jung:j }; }
+  }
+  T5.cur = n;
+  if (flushed) { T5.stack = [{}]; if (n.cho && n.jung) T5.stack.push({ cho:n.cho }); T5.stack.push(n); }
+  else T5.stack.push(n);
+}
+function back5() {
+  if (T5.stack.length > 1) { T5.stack.pop(); T5.cur = { ...T5.stack[T5.stack.length - 1] }; }
+  else if (T5.text) { const a = Array.from(T5.text); a.pop(); T5.text = a.join(''); }
+}
+function put5(str) { commit5(); T5.text += str; }
+
+/* ── 입력창 렌더 ── */
+const esc5 = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function renderField5() {
+  const comp = syl5(T5.cur);
+  const empty = !T5.text && !comp;
+  field5.innerHTML = empty
+    ? '<span class="p5-caret"></span><span class="ph">메시지 입력</span>'
+    : esc5(T5.text) + (comp ? '<u>' + esc5(comp) + '</u>' : '') + '<span class="p5-caret"></span>';
+  field5.scrollTop = field5.scrollHeight;
+  const n = Array.from(T5.text + comp).length;
+  len5.textContent = n ? n + '자' : '';
+  send5.disabled = !(T5.text + comp).trim();
+}
+function sendMsg5() {
+  commit5();
+  const t = T5.text.replace(/\s+$/, '');
+  if (!t.trim()) return;
+  const b = document.createElement('div'); b.className = 'p5-b out'; b.textContent = t;
+  const d = new Date(), tm = document.createElement('div'); tm.className = 'p5-t';
+  tm.textContent = (d.getHours() < 12 ? '오전 ' : '오후 ') + ((d.getHours() + 11) % 12 + 1) + ':' + String(d.getMinutes()).padStart(2, '0');
+  msgs5.append(b, tm); msgs5.scrollTop = msgs5.scrollHeight;
+  T5.text = ''; T5.cur = {}; T5.stack = [{}];
+  renderField5(); vibe([8, 30, 8]);
+}
+send5.addEventListener('click', sendMsg5);
+
+/* ── 자판 배열 ── */
+const KO5  = ['ㅂㅈㄷㄱㅅㅛㅕㅑㅐㅔ', 'ㅁㄴㅇㄹㅎㅗㅓㅏㅣ', 'ㅋㅌㅊㅍㅠㅜㅡ'];
+const KOS5 = ['ㅃㅉㄸㄲㅆㅛㅕㅑㅒㅖ', 'ㅁㄴㅇㄹㅎㅗㅓㅏㅣ', 'ㅋㅌㅊㅍㅠㅜㅡ'];
+const EN5  = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+const SYM5 = [['1','2','3','4','5','6','7','8','9','0'], ['!','@','#','₩','%','^','&','*','(',')'], ['~','-','\'','"',':',';','?','/']];
+const K5 = { lang:'ko', shift:0, sym:false, lastShift:0 };   // shift: 0 끔, 1 한 번, 2 고정(영문)
+
+function keyHTML5(k, cls, label, sup) {
+  return `<div class="k5 ${cls || ''}" data-k="${esc5(k)}">${label != null ? label : esc5(k)}${sup ? '<sup>' + sup + '</sup>' : ''}</div>`;
+}
+function buildKeys5() {
+  let rows;
+  if (K5.sym) rows = SYM5;
+  else if (K5.lang === 'ko') rows = (K5.shift ? KOS5 : KO5).map(r => Array.from(r));
+  else rows = EN5.map(r => Array.from(K5.shift ? r.toUpperCase() : r));
+  let h = '';
+  // 1열 : 숫자 힌트 (길게 누르면 숫자)
+  h += '<div class="k5-row">' + rows[0].map((k, i) => keyHTML5(k, '', null, K5.sym ? '' : String((i + 1) % 10))).join('') + '</div>';
+  // 2열 : 삼성처럼 반 칸 들여쓰기 (9키)
+  const pad = rows[1].length < 10 ? '<div class="k5 gap"></div>' : '';
+  h += '<div class="k5-row">' + pad + rows[1].map(k => keyHTML5(k)).join('') + pad + '</div>';
+  // 3열 : Shift + 글자 + 지우기
+  const shCls = 'fn w15' + (K5.shift === 2 ? ' lock' : K5.shift ? ' lit' : '');
+  h += '<div class="k5-row">' + (K5.sym ? keyHTML5('#sym2', 'fn w15', '1/2') : keyHTML5('#shift', shCls, '⇧'))
+     + rows[2].map(k => keyHTML5(k)).join('') + keyHTML5('#back', 'fn w15', '⌫') + '</div>';
+  // 4열 : !#1 · 한/영 · , · 스페이스 · . · 엔터
+  h += '<div class="k5-row">'
+     + keyHTML5('#sym', 'fn w13', K5.sym ? (K5.lang === 'ko' ? '가' : 'ABC') : '!#1')
+     + keyHTML5('#lang', 'fn w11', K5.lang === 'ko' ? '한/<span style="opacity:.5">영</span>' : '<span style="opacity:.5">한</span>/영')
+     + keyHTML5(',', 'fn')
+     + keyHTML5(' ', 'sp', K5.lang === 'ko' ? '한국어' : 'English')
+     + keyHTML5('.', 'fn')
+     + keyHTML5('#enter', 'fn w15', '↵')
+     + '</div>';
+  board5.innerHTML = h;
+}
+
+/* ── 키 소리 : 짧은 딸깍 ── */
+function click5(fn) {
+  const ac = actx4; if (!ac || ac.state !== 'running') return;
+  const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+  o.type = 'triangle'; o.frequency.setValueAtTime(fn ? 520 : 760, t); o.frequency.exponentialRampToValueAtTime(fn ? 260 : 380, t + 0.03);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+  o.connect(g).connect(ac.destination); o.start(t); o.stop(t + 0.06);
+}
+
+/* ── 키 입력 처리 ── */
+function typeKey5(k) {
+  if (k === '#back')  { back5(); }
+  else if (k === '#enter') { put5('\n'); }
+  else if (k === '#shift') {
+    const now = performance.now();
+    if (K5.lang === 'en' && K5.shift === 1 && now - K5.lastShift < 350) K5.shift = 2;
+    else K5.shift = K5.shift ? 0 : 1;
+    K5.lastShift = now; buildKeys5(); return;
+  }
+  else if (k === '#lang') { commit5(); K5.lang = K5.lang === 'ko' ? 'en' : 'ko'; K5.shift = 0; K5.sym = false; buildKeys5(); }
+  else if (k === '#sym')  { commit5(); K5.sym = !K5.sym; K5.shift = 0; buildKeys5(); }
+  else if (k === '#sym2') { return; }
+  else if (k === ' ') { put5(' '); }
+  else if (!K5.sym && K5.lang === 'ko' && (CHO5.includes(k) || JUNG5.includes(k))) {
+    jamo5(k);
+    if (K5.shift === 1) { K5.shift = 0; buildKeys5(); }
+  } else {
+    put5(k);
+    if (K5.shift === 1) { K5.shift = 0; buildKeys5(); }
+  }
+  renderField5();
+}
+
+const press5 = new Map();   // pointerId → { el, k, long, t }
+let rep5 = null;
+function showPop5(el, txt) {
+  const kr = kb5.getBoundingClientRect(), r = el.getBoundingClientRect();
+  pop5.textContent = txt; pop5.style.display = 'flex';
+  const w = Math.max(44, r.width + 8);
+  pop5.style.minWidth = w + 'px';
+  pop5.style.left = Math.max(2, Math.min(kr.width - w - 2, r.left - kr.left + r.width / 2 - w / 2)) + 'px';
+  pop5.style.top = (r.top - kr.top - 60) + 'px';
+}
+function hidePop5() { pop5.style.display = 'none'; }
+
+board5.addEventListener('pointerdown', e => {
+  const el = e.target.closest('.k5'); if (!el || el.classList.contains('gap')) return;
+  e.preventDefault(); ensureCtx4();
+  const k = el.dataset.k, fn = k.length > 1 && k[0] === '#';
+  el.classList.add('down'); vibe(6); click5(fn || k === ' ');
+  const P = { el, k, long:false, t:0 };
+  press5.set(e.pointerId, P);
+  if (!fn && k !== ' ') showPop5(el, k);
+  if (k === '#back') {                         // 지우기 : 누르는 즉시 + 길게 누르면 연속 삭제
+    typeKey5(k); P.long = true;
+    clearInterval(rep5); rep5 = setTimeout(function r() { typeKey5('#back'); vibe(4); rep5 = setTimeout(r, 60); }, 420);
+  } else if (el.querySelector('sup') && el.querySelector('sup').textContent) {   // 1열 길게 → 숫자
+    const num = el.querySelector('sup').textContent;
+    P.t = setTimeout(() => { P.long = true; put5(num); renderField5(); showPop5(el, num); vibe(12); }, 380);
+  }
+});
+function release5(e) {
+  const P = press5.get(e.pointerId); if (!P) return;
+  press5.delete(e.pointerId);
+  clearTimeout(P.t); P.el.classList.remove('down');
+  if (P.k === '#back') { clearTimeout(rep5); rep5 = null; }
+  if (!P.long && e.type === 'pointerup') typeKey5(P.k);
+  if (!press5.size) hidePop5();
+}
+window.addEventListener('pointerup', release5);
+window.addEventListener('pointercancel', release5);
+
+/* ── 모드 전환 ── */
+function setMode5(m, why) {
+  if (G5.mode === m) return;
+  G5.mode = m; G5.target = m;
+  modeLb5.textContent = MODE_LB5[m];
+  vibe(m ? [10, 30, 6] : [6, 20, 6]);
+}
+q5('swap5').addEventListener('click', () => setMode5(-G5.mode || 1));
+q5('full5').addEventListener('click', () => setMode5(0));
+q5('calib5').addEventListener('click', () => { G5.base = null; G5.armed = true; });
+function onShake5() { setMode5(0); G5.armed = false; }
+
+/* 시뮬레이터-4와 같은 기울기 계산 (beta·gamma → 화면 평면 위 좌우 중력 성분) */
+function tilt5() {
+  if (gotOri) {
+    const b = oriBeta * DEG, g = oriGamma * DEG;
+    const x = Math.cos(b) * Math.sin(g);
+    if (G5.base == null) G5.base = x;
+    return { x:x - G5.base, live:true };
+  }
+  return { x:Math.sin(+slider5.value * DEG), live:false };
+}
+function resize5() { G5.K = kb5.clientWidth; G5.applied = ''; }
+if (window.ResizeObserver) new ResizeObserver(resize5).observe(kb5);
+
+function updateSim5(t, dt) {
+  if (!G5.K) { resize5(); if (!G5.K) return; }
+  const tv = tilt5();
+  G5.ax += (tv.x - G5.ax) * 0.18;
+  const deg = Math.asin(clamp4(G5.ax, -1, 1)) / DEG, ad = Math.abs(deg);
+  if (tv.live) slider5.value = Math.round(clamp4(deg, -25, 25));
+
+  /* 문턱 판정 : 넘으면 그쪽 한 손 모드, 수평으로 돌아와야 다음 기울기를 받음 */
+  if (ad < EXIT5) G5.armed = true;
+  else if (G5.armed && ad > ENTER5) { setMode5(deg > 0 ? 1 : -1); G5.armed = false; }
+
+  /* 문턱 전에는 기우는 쪽으로 살짝 끌려감 (가운데 모드에서만) */
+  let tgt = G5.target;
+  if (G5.mode === 0 && G5.armed && ad > EXIT5 * 0.6) tgt = Math.sign(deg) * 0.16 * Math.min(1, (ad - EXIT5 * 0.6) / (ENTER5 - EXIT5 * 0.6));
+
+  /* 스프링 : 살짝 지나쳤다가 제자리 */
+  G5.sv += (tgt - G5.s) * 0.14 * dt;
+  G5.sv *= Math.pow(0.74, dt);
+  G5.s = clamp4(G5.s + G5.sv * dt, -1.04, 1.04);
+
+  const K = G5.K, a = Math.min(1, Math.abs(G5.s));
+  const w = K * (1 - (1 - ONE5) * Math.abs(G5.s));
+  const left = G5.s > 0 ? K - w : 0;
+  const key = w.toFixed(1) + '|' + left.toFixed(1);
+  if (key !== G5.applied) {
+    G5.applied = key;
+    board5.style.width = w + 'px'; board5.style.marginLeft = left + 'px';
+    const sideW = K - w, show = a > 0.3;
+    side5.style.width = sideW + 'px';
+    side5.style.left = G5.s > 0 ? '0' : (K - sideW) + 'px';
+    side5.style.opacity = show ? Math.min(1, (a - 0.3) / 0.5) : 0;
+    side5.style.pointerEvents = show ? 'auto' : 'none';
+  }
+
+  if (t - G5.lastRead > 200) {
+    G5.lastRead = t;
+    readout5.innerHTML = (tv.live
+      ? `센서 수신 중 · 좌우 <b>${deg >= 0 ? '+' : ''}${deg.toFixed(1)}°</b>`
+      : (started ? '센서 값 없음 · 슬라이더로 기울기를 흉내 내세요' : '센서 대기 · 시작 버튼을 누르거나 슬라이더를 움직이세요'))
+      + (G5.armed ? ` · ${ENTER5}° 넘게 기울이면 전환` : ' · 수평으로 돌아오면 다시 전환 가능') ;
+  }
+}
+
+buildKeys5(); renderField5();
 
 </script>
 </body>
