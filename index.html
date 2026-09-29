@@ -187,7 +187,7 @@
     #panel5 { background: #000; }
     .p5-wrap {
         position: absolute; inset: 0; display: flex; flex-direction: column; text-align: left;
-        padding: 50px 0 calc(40px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box;
+        padding: 50px 0 calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box;
         max-width: 430px; margin: 0 auto;
     }
     #panel5.wide .p5-wrap { max-width: none; }
@@ -342,8 +342,6 @@
         <div><div class="p5-name">디자인 리서치 랩</div><div class="p5-sub">자판 테스트</div></div>
       </div>
       <div class="p5-msgs" id="msgs5">
-        <div class="p5-b in">폰을 오른쪽으로 기울이면 자판이 오른손 엄지 쪽으로 모여요.</div>
-        <div class="p5-b in">왼쪽으로 기울이면 왼손 쪽으로. 다시 수평(±10°)으로 들면 가운데로 펼쳐져요.</div>
       </div>
       <div class="p5-comp">
         <div class="p5-field" id="field5"></div>
@@ -409,6 +407,7 @@ document.querySelectorAll('.tab').forEach(tab => {
         activeSim = parseInt(tab.dataset.sim);
         document.getElementById('panel' + activeSim).classList.add('active');
         statusDiv.classList.toggle('on-light', activeSim === 3);
+        statusDiv.style.display = activeSim === 5 ? 'none' : '';   // 자판 시뮬레이터에서는 하단 안내 문구 숨김
         if (activeSim === 4) { requestAnimationFrame(resize4); warm4(); }
         if (activeSim === 5) requestAnimationFrame(resize5);
         else if (mus4.playing) pause4();
