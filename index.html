@@ -1295,8 +1295,8 @@ function finishStep4() {
   el.classList.remove('as-ball');
   requestAnimationFrame(() => { const c = homeC4(id); placeBtn4(id, c.x, c.y, false); });
   G4.step = (G4.step + 1) % SEQ4.length;
-  if (gotOri) G4.armed = false;            // 기울인 채로면 다음 구슬이 바로 굴러가지 않게
-  else slider4.value = 0;
+  G4.armed = true;                         // [수정] 수평 복귀를 기다리지 않고 바로 기울기에 반응
+  if (!gotOri) slider4.value = 0;
   activate4();
 }
 function run4(id) {
@@ -1327,11 +1327,14 @@ stage4.addEventListener('pointerdown', e => {
   G4.pressing = true; B.scaleTarget = 1.3;
   vibe([14, 20, 8]);                         // 시뮬레이터-2와 같은 딱-딱 쇳소리 진동
   run4(id);                                  // 누르는 순간 바로 실행 → 음악이 즉시 나옴
+  // 재생을 시작했으면 다음 단계로, 일시정지했으면 엄지 존에 그대로 머묾 (흔들면 넘어감)
+  G4.pressAdvance = !(id === 'play' && !mus4.playing);
+  G4.statKey = '';
 }, true);
 window.addEventListener('pointerup', () => {
   const B = G4.ball;
   B.scaleTarget = 1;
-  if (G4.pressing) { G4.pressing = false; setTimeout(finishStep4, 140); }
+  if (G4.pressing) { G4.pressing = false; if (G4.pressAdvance) setTimeout(finishStep4, 140); }
 });
 window.addEventListener('pointercancel', () => { G4.pressing = false; G4.ball.scaleTarget = 1; });
 
@@ -1418,11 +1421,13 @@ function updateSim4(t, dt) {
     }
   } else {
     const z = zoneC4(); B.x = z.x; B.y = z.y;
-    if (G4.statKey !== 'flash') setStat4('set' + n, id === 'volume'
+    if (G4.statKey !== 'flash') setStat4('set' + n + mus4.playing, id === 'volume'
       ? `${n}단계 · VOLUME 안착 · 돌려서 볼륨 조절 · 누르거나 흔들면 다음`
       : id === 'next'
         ? `${n}단계 · NEXT 안착 · 시계 방향 다음 곡 / 반대 이전 곡 · 누르거나 흔들면 다음`
-        : `${n}단계 · PLAY 안착 · 눌러서 재생 · 흔들면 다음 단계`);
+        : mus4.playing
+          ? `${n}단계 · 재생 중 · 누르면 일시정지 · 흔들면 다음 단계`
+          : `${n}단계 · PLAY 안착 · 눌러서 재생 · 흔들면 다음 단계`);
   }
 
   updateScaleSpring(B);
