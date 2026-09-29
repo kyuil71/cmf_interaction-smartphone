@@ -131,6 +131,12 @@
         color: #8cc9e8; font-size: 12px; pointer-events: none;
         transition: box-shadow .35s, border-color .35s, background .35s;
     }
+    /* 끌어당김 범위 표시 (존 반지름 × 1.5) */
+    .p4-zone::before {
+        content: ""; position: absolute; inset: -33px; border-radius: 50%;
+        border: 1px dashed rgba(125,211,252,.18);
+        background: radial-gradient(circle, rgba(125,211,252,.05) 60%, rgba(125,211,252,0) 72%);
+    }
     .p4-zone.lit {
         border-style: solid; border-color: rgba(125,211,252,.8);
         background: radial-gradient(circle, rgba(0,0,0,.35) 30%, rgba(125,211,252,.08) 70%);
@@ -1242,6 +1248,7 @@ const LB4 = { play:'PLAY', volume:'VOLUME', next:'NEXT' };
 const HOME4 = { play:{ fx:.22, fy:.24 }, volume:{ fx:.56, fy:.43 }, next:{ fx:.26, fy:.66 } };
 const BTN4 = {}; SEQ4.forEach(id => { BTN4[id] = q4('b4-' + id); });
 const R4 = 42;
+const CAPTURE4 = 1.5;      // 엄지 존이 구슬을 끌어당기는 범위 = 존 반지름 × 1.5 (기존 대비 +50%)
 const TRIG4 = 3;          // 이 각도 미만의 기울기로는 구슬이 출발하지 않음 (정지 마찰)
 const G4 = {
   step:0, ball:makeBallState(), inited:false,
@@ -1386,7 +1393,8 @@ function updateSim4(t, dt) {
 
     /* Thumb Zone = 오목한 접시 : 들어오면 중심으로 끌리며 빠르게 감쇠 → 제자리에 쏙 안착 */
     const z = zoneC4(), zx = z.x - B.x, zy = z.y - B.y, zd = Math.hypot(zx, zy);
-    if (zd < z.r) {
+    const cr = z.r * CAPTURE4;
+    if (zd < cr) {
       if (!G4.inZone) { G4.inZone = true; vibe(10); }
       B.vx += zx * 0.006 * dt; B.vy += zy * 0.006 * dt;
       B.vx *= Math.pow(0.93, dt); B.vy *= Math.pow(0.93, dt);
@@ -1409,7 +1417,7 @@ function updateSim4(t, dt) {
     } else G4.rollTick = 0;
 
     const zd2 = Math.hypot(z.x - B.x, z.y - B.y);
-    if (G4.inZone && zd2 < z.r * 0.4 && spd < 0.45) {   // 접시 바닥 근처에서 거의 멈추면 중심으로 쏙
+    if (G4.inZone && zd2 < cr * 0.4 && spd < 0.45) {   // 접시 바닥 근처에서 거의 멈추면 중심으로 쏙
       /* 안착 : 중심에 맞추고, 살짝 가라앉았다 튀어 오르는 스프링 + 묵직한 진동 */
       G4.settled = true; B.x = z.x; B.y = z.y; B.vx = B.vy = 0;
       B.scaleVel -= 0.07; vibe([12, 30, 6]);
