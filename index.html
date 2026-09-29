@@ -190,6 +190,8 @@
         padding: 50px 0 calc(40px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box;
         max-width: 430px; margin: 0 auto;
     }
+    #panel5.wide .p5-wrap { max-width: none; }
+    #panel5.wide .k5 { height: 50px; }
     .p5-ctrl { padding: 8px 14px 6px; }
     .p5-ctrl .p4-row button.on { background: #3e91ff; }
     .p5-mode { flex: none; font-size: 13px; font-weight: 700; color: #cfe3ff; min-width: 52px; text-align: right; }
@@ -341,7 +343,7 @@
       </div>
       <div class="p5-msgs" id="msgs5">
         <div class="p5-b in">폰을 오른쪽으로 기울이면 자판이 오른손 엄지 쪽으로 모여요.</div>
-        <div class="p5-b in">왼쪽으로 기울이면 왼손 쪽으로. 흔들면 다시 가운데로 펼쳐져요.</div>
+        <div class="p5-b in">왼쪽으로 기울이면 왼손 쪽으로. 다시 수평(±10°)으로 들면 가운데로 펼쳐져요.</div>
       </div>
       <div class="p5-comp">
         <div class="p5-field" id="field5"></div>
@@ -1649,10 +1651,12 @@ const kb5 = q5('kb5'), board5 = q5('board5'), side5 = q5('side5'), pop5 = q5('po
 const field5 = q5('field5'), send5 = q5('send5'), msgs5 = q5('msgs5'), len5 = q5('len5');
 const slider5 = q5('tilt5'), readout5 = q5('readout5'), modeLb5 = q5('mode5');
 
-const ENTER5 = 12;      // 이 각도를 넘으면 한 손 자판으로 전환
-const EXIT5  = 5;       // 이 각도 안으로 돌아오면 다음 기울기를 받을 준비
-const ONE5   = 0.74;    // 한 손 모드 자판 폭 (전체 대비)
-const G5 = { mode:0, armed:true, s:0, sv:0, target:0, ax:0, base:null, K:0, lastRead:0, applied:'' };
+const DEAD5  = 10;      // 좌우 ±10° 안은 '가운데'로 봄
+const HYST5  = 2;       // 경계에서 떨림 방지 : 한 손 → 가운데 복귀는 8° 안으로 들어와야 함
+const DWELL5 = 180;     // 새 구역에 이만큼(ms) 머물러야 전환 (순간 흔들림 무시)
+const ONE_PHONE5 = 0.74;   // 일반 폰 : 한 손 자판 폭 (전체 대비)
+const ONE_FOLD5  = 0.5;    // 갤럭시 폴드 펼친 화면 : 절반 크기
+const G5 = { mode:0, zone:0, pend:0, pendT:0, s:0, sv:0, target:0, ax:0, base:null, K:0, lastRead:0, applied:'', wide:false, one:ONE_PHONE5 };
 const MODE_LB5 = { '-1':'왼손', '0':'가운데', '1':'오른손' };
 
 /* ── 한글 오토마타 (두벌식) ── */
@@ -1839,8 +1843,8 @@ function setMode5(m, why) {
 }
 q5('swap5').addEventListener('click', () => setMode5(-G5.mode || 1));
 q5('full5').addEventListener('click', () => setMode5(0));
-q5('calib5').addEventListener('click', () => { G5.base = null; G5.armed = true; });
-function onShake5() { setMode5(0); G5.armed = false; }
+q5('calib5').addEventListener('click', () => { G5.base = null; });
+function onShake5() { setMode5(0); }   // 흔들면 가운데 (다음에 다른 구역으로 기울이면 다시 따라감)
 
 /* 시뮬레이터-4와 같은 기울기 계산 (beta·gamma → 화면 평면 위 좌우 중력 성분) */
 function tilt5() {
@@ -1852,7 +1856,15 @@ function tilt5() {
   }
   return { x:Math.sin(+slider5.value * DEG), live:false };
 }
-function resize5() { G5.K = kb5.clientWidth; G5.applied = ''; }
+/* 펼친 폴드(가로 560px 이상)인지 판단 → 폭 제한 해제 + 한 손 자판을 절반 크기로 */
+function layout5() {
+  const wide = window.innerWidth >= 560;
+  if (wide !== G5.wide) { G5.wide = wide; q5('panel5').classList.toggle('wide', wide); }
+  G5.one = wide ? ONE_FOLD5 : ONE_PHONE5;
+}
+function resize5() { layout5(); G5.K = kb5.clientWidth; G5.applied = ''; }
+window.addEventListener('resize', resize5);
+layout5();
 if (window.ResizeObserver) new ResizeObserver(resize5).observe(kb5);
 
 function updateSim5(t, dt) {
@@ -1862,13 +1874,16 @@ function updateSim5(t, dt) {
   const deg = Math.asin(clamp4(G5.ax, -1, 1)) / DEG, ad = Math.abs(deg);
   if (tv.live) slider5.value = Math.round(clamp4(deg, -25, 25));
 
-  /* 문턱 판정 : 넘으면 그쪽 한 손 모드, 수평으로 돌아와야 다음 기울기를 받음 */
-  if (ad < EXIT5) G5.armed = true;
-  else if (G5.armed && ad > ENTER5) { setMode5(deg > 0 ? 1 : -1); G5.armed = false; }
-
-  /* 문턱 전에는 기우는 쪽으로 살짝 끌려감 (가운데 모드에서만) */
-  let tgt = G5.target;
-  if (G5.mode === 0 && G5.armed && ad > EXIT5 * 0.6) tgt = Math.sign(deg) * 0.16 * Math.min(1, (ad - EXIT5 * 0.6) / (ENTER5 - EXIT5 * 0.6));
+  /* 구역 판정 : ±10° 안은 가운데, 넘으면 그쪽 한 손 자판 (경계 2° 여유 + 짧은 머무름) */
+  let z;
+  if (ad > DEAD5) z = deg > 0 ? 1 : -1;
+  else if (ad < DEAD5 - HYST5) z = 0;
+  else z = G5.zone;
+  if (z !== G5.zone) {
+    if (z !== G5.pend) { G5.pend = z; G5.pendT = t; }
+    else if (t - G5.pendT > DWELL5) { G5.zone = z; setMode5(z); }
+  } else G5.pend = z;
+  const tgt = G5.target;
 
   /* 스프링 : 살짝 지나쳤다가 제자리 */
   G5.sv += (tgt - G5.s) * 0.14 * dt;
@@ -1876,7 +1891,7 @@ function updateSim5(t, dt) {
   G5.s = clamp4(G5.s + G5.sv * dt, -1.04, 1.04);
 
   const K = G5.K, a = Math.min(1, Math.abs(G5.s));
-  const w = K * (1 - (1 - ONE5) * Math.abs(G5.s));
+  const w = K * (1 - (1 - G5.one) * Math.abs(G5.s));
   const left = G5.s > 0 ? K - w : 0;
   const key = w.toFixed(1) + '|' + left.toFixed(1);
   if (key !== G5.applied) {
@@ -1894,7 +1909,7 @@ function updateSim5(t, dt) {
     readout5.innerHTML = (tv.live
       ? `센서 수신 중 · 좌우 <b>${deg >= 0 ? '+' : ''}${deg.toFixed(1)}°</b>`
       : (started ? '센서 값 없음 · 슬라이더로 기울기를 흉내 내세요' : '센서 대기 · 시작 버튼을 누르거나 슬라이더를 움직이세요'))
-      + (G5.armed ? ` · ${ENTER5}° 넘게 기울이면 전환` : ' · 수평으로 돌아오면 다시 전환 가능') ;
+      + ` · ±${DEAD5}° 안은 가운데` + (G5.wide ? ' · 폴드 화면' : '');
   }
 }
 
