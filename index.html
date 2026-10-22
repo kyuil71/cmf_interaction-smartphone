@@ -147,7 +147,7 @@
         border: 1px solid rgba(255,255,255,.1);
         background: linear-gradient(180deg, #222838, #171c28);
         color: #fff; display: flex; align-items: center; justify-content: center;
-        font-weight: 700; font-size: 14px; letter-spacing: .2px; font-family: inherit;
+        font-weight: 700; font-size: 17px; letter-spacing: .2px; font-family: inherit;
         box-shadow: 0 8px 26px rgba(0,0,0,.35);
         transition: left .55s cubic-bezier(.2,.85,.25,1), top .55s cubic-bezier(.2,.85,.25,1),
                     transform .22s ease, opacity .18s ease;
@@ -167,6 +167,7 @@
     }
     .knob-lb { display: flex; flex-direction: column; align-items: center; line-height: 1.1; font-size: 11px; color: #9aa3b2; pointer-events: none; }
     .knob-lb b { font-size: 17px; color: #fff; font-variant-numeric: tabular-nums; }
+    #b4-volume .knob-lb { font-size: 17px; font-weight: 700; color: #fff; }   /* VOL 글씨를 NEXT와 같은 크기로 */
     .p4-stat { display: none !important; }
     .p4-stat-unused {
         position: absolute; left: 16px; right: 16px; top: 14px; z-index: 4; pointer-events: none;
@@ -1706,8 +1707,8 @@ function draw4(t) {
     ctx4.fillStyle = '#7dd3fc'; ctx4.shadowColor = 'rgba(125,211,252,.9)'; ctx4.shadowBlur = 6;
     ctx4.beginPath(); ctx4.arc(B.x + Math.cos(a1) * R * 0.66, B.y + Math.sin(a1) * R * 0.66, 3.2, 0, Math.PI * 2); ctx4.fill();
     ctx4.shadowBlur = 0;
-    engrave4(String(Math.round(mus4.vol)), B.x, B.y + 1, '800 17px system-ui, sans-serif');
-    engrave4('VOL', B.x, B.y - 15 * B.scale, '700 10px system-ui, sans-serif');
+    engrave4(String(Math.round(mus4.vol)), B.x, B.y + 10 * B.scale, '800 17px system-ui, sans-serif');
+    engrave4('VOL', B.x, B.y - 9 * B.scale, '800 17px system-ui, sans-serif');
   } else if (id === 'next') {
     for (let k = 0; k < 28; k++) {
       const a = nextAng4 + k / 28 * Math.PI * 2;
@@ -1721,10 +1722,10 @@ function draw4(t) {
     ctx4.fillStyle = '#7dd3fc'; ctx4.shadowColor = 'rgba(125,211,252,.9)'; ctx4.shadowBlur = 6;
     ctx4.beginPath(); ctx4.arc(B.x + Math.cos(ai) * R * 0.66, B.y + Math.sin(ai) * R * 0.66, 3.2, 0, Math.PI * 2); ctx4.fill();
     ctx4.shadowBlur = 0;
-    engrave4('NEXT', B.x, B.y + 2, '800 14px system-ui, sans-serif');
+    engrave4('NEXT', B.x, B.y + 2, '800 17px system-ui, sans-serif');
     engrave4('◀     ▶', B.x, B.y + 17 * B.scale, '700 9px system-ui, sans-serif');
   } else {
-    engrave4(mus4.playing ? 'PAUSE' : 'PLAY', B.x, B.y, '800 14px system-ui, sans-serif');
+    engrave4(mus4.playing ? 'PAUSE' : 'PLAY', B.x, B.y, '800 17px system-ui, sans-serif');
   }
   ctx4.restore();
 }
